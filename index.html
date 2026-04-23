@@ -1106,38 +1106,41 @@
             ctx.lineTo(centerX + halfWidth * scale, topY);
             ctx.stroke();
             
-            // 绘制掏槽眼（每个掏槽深度不同）
+            // 绘制掏槽眼（根据计算表格数据）
             for (let i = 0; i < 5; i++) {
                 const a = a1 + i * stepA;  // 布眼距离（离中心线距离）
                 const d = d1 + i * stepD;  // 孔底位置（离中心线距离）
-                const depth = depths[i];    // 实际孔深
+                const depth = depths[i];    // 实际孔深 c
+                const angleB = angles[i];   // 角B（与掌子面夹角）
                 const color = colors[i % colors.length];
                 
-                // 左侧掏槽眼
-                const leftX = centerX - a * scale;  // 左侧孔口X
-                const leftEndX = centerX - d * scale;   // 左侧孔底X
-                const leftEndY = faceY - depth * scale;  // 左侧孔底Y（向上推进）
+                // 计算孔底Y坐标：孔深 * sin(角B)
+                // 角B是孔与掌子面的夹角，sin(角B) = 推进深度 / 孔深
+                const depthY = depth * Math.sin(angleB * Math.PI / 180) * scale;
                 
-                drawInclinedHole(ctx, leftX, faceY, leftEndX, leftEndY, color, i + 1, a, d, depth, '左');
+                // 左侧掏槽眼
+                const leftX = centerX - a * scale;      // 左侧孔口X
+                const leftEndX = centerX - d * scale;   // 左侧孔底X
+                const leftEndY = faceY - depthY;        // 左侧孔底Y
+                
+                drawInclinedHole(ctx, leftX, faceY, leftEndX, leftEndY, color, i + 1, a, d, depth, angleB, '左');
                 
                 // 右侧掏槽眼
-                const rightX = centerX + a * scale;  // 右侧孔口X
-                const rightEndX = centerX + d * scale;   // 右侧孔底X
-                const rightEndY = faceY - depth * scale;  // 右侧孔底Y
+                const rightX = centerX + a * scale;     // 右侧孔口X
+                const rightEndX = centerX + d * scale;  // 右侧孔底X
+                const rightEndY = faceY - depthY;       // 右侧孔底Y
                 
-                drawInclinedHole(ctx, rightX, faceY, rightEndX, rightEndY, color, i + 1, a, d, depth, '右');
+                drawInclinedHole(ctx, rightX, faceY, rightEndX, rightEndY, color, i + 1, a, d, depth, angleB, '右');
             }
             
-            // 绘制图例（简化）
-            ctx.font = '11px Arial';
-            ctx.textAlign = 'left';
-            for (let i = 0; i < 5; i++) {
-                const y = 22 + i * 16;
-                ctx.fillStyle = colors[i];
-                ctx.fillRect(8, y - 10, 12, 12);
-                ctx.fillStyle = '#ccc';
-                ctx.fillText(`第${i+1}掏槽 深度${depths[i].toFixed(1)}m`, 25, y);
-            }
+            // 绘制图例背景
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(5, 10, 180, 88);
+            
+            // 图例标题
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = 'bold 11px Arial';
+            ctx.fillText('角度 / 孔深', 25, 22);
             
             // 绘制图例
             ctx.font = '10px Arial';
@@ -1169,8 +1172,8 @@
             ctx.fillText('↓ 推进方向 ↓', centerX, endY + 12);
         }
         
-        // 绘制倾斜的掏槽眼（简化标注）
-        function drawInclinedHole(ctx, x1, y1, x2, y2, color, level, a, d, depth, side) {
+        // 绘制倾斜的掏槽眼
+        function drawInclinedHole(ctx, x1, y1, x2, y2, color, level, a, d, depth, angleB, side) {
             // 孔口（掌子面上的位置）
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -1192,6 +1195,13 @@
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.stroke();
+            
+            // 在图例位置标注角度（只在左侧绘制一次）
+            if (side === '左') {
+                ctx.fillStyle = color;
+                ctx.font = '11px Arial';
+                ctx.fillText(`第${level}掏槽: ${angleB.toFixed(1)}° / ${depth.toFixed(2)}m`, 25, 22 + (level-1) * 16);
+            }
         }
         
         // ====== 初始化 ======
