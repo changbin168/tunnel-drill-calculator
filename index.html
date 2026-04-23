@@ -71,7 +71,7 @@
         .form-group { margin-bottom: 18px; }
         .form-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #ccc; font-size: 0.95em; }
         .param-badge { background: rgba(0,212,255,0.2); color: #00d4ff; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-family: monospace; }
-        .param-desc { color: #888; font-size: 0.85em; margin-left: 20px; margin-top: -5px; margin-bottom: 8px; }
+        .param-desc { color: #ffc107; font-size: 0.85em; margin-left: 20px; margin-top: -5px; margin-bottom: 8px; }
         .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 2px solid rgba(255,255,255,0.15); border-radius: 10px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1em; transition: border-color 0.3s; }
         .form-group input:focus, .form-group select:focus { outline: none; border-color: #00d4ff; }
         
@@ -89,6 +89,26 @@
         .result-label { color: #aaa; }
         .result-value { color: #fff; font-weight: bold; font-family: monospace; }
         .result-highlight { color: #ffd700; font-size: 1.2em; }
+        
+        /* 公式说明框 */
+        .formula-note {
+            background: rgba(255,193,7,0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .formula-note p { margin: 5px 0; font-size: 0.9rem; color: #ffc107; }
+        
+        /* 警告说明框 */
+        .warning-note {
+            background: rgba(255,71,87,0.2);
+            border-left: 4px solid #ff4757;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .warning-note p { margin: 5px 0; font-size: 0.9rem; color: #ff4757; }
         
         /* 管理页面 */
         .admin-section { display: none; }
@@ -271,6 +291,25 @@
                     </div>
                     <button class="btn-calculate" onclick="calculate()">开始计算</button>
                     <button class="btn-reset" onclick="resetForm()">重置参数</button>
+                    
+                    <!-- 公式说明 -->
+                    <div class="formula-note" style="font-size:0.85rem; margin-top: 15px;">
+                        <p><strong style="color:#ffc107;">📐 参数说明：</strong></p>
+                        <p>• <strong>布眼距离(a)：</strong>该级掏槽布眼位置到隧道中心线的距离</p>
+                        <p>• <strong>孔底位置(d)：</strong>该级掏槽孔底到隧道中心线的距离</p>
+                        <p>• <strong>相对底边(e)：</strong>e = a - d，掏槽眼眼底到隧道中心的水平距离</p>
+                        <p>• <strong>开挖深度(c)：</strong>钻孔深度</p>
+                        <p>• <strong>∠A' (台车输入角度)：</strong>台车钻孔俯仰角（关键参数）</p>
+                        <p>• <strong>可布眼最大间距：</strong>辅助眼之间可布置的最大间距</p>
+                    </div>
+                    
+                    <!-- 注意事项 -->
+                    <div class="warning-note" style="font-size:0.85rem; margin-top: 15px;">
+                        <p><strong>⚠️ 注意事项：</strong></p>
+                        <p>• 正值：向下倾斜 | 负值：向上倾斜 | 值越大角度越陡</p>
+                        <p>• 实际施工中应考虑超挖量</p>
+                        <p>• 本计算基于理论值，实际角度可能有偏差</p>
+                    </div>
                 </div>
             </div>
         </div>
