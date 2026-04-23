@@ -1,5 +1,11 @@
 {
-  "users": [],
+  "users": [
+    {
+      "deviceId": "device_1776910799690_soogqhrz6",
+      "trials": 1,
+      "lastLogin": "2026-04-23T02:25:39.114Z"
+    }
+  ],
   "publicPassword": "Cb17612833821.",
   "adminPassword": "admin2026",
   "version": "1.0"
