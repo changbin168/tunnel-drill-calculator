@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>三臂凿岩台车开挖角度计算</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
@@ -17,10 +13,7 @@
             padding: 20px;
             color: #fff;
         }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1200px; margin: 0 auto; }
         
         /* 登录界面 */
         .login-screen {
@@ -30,11 +23,7 @@
             padding: 40px;
             border-radius: 20px;
         }
-        .login-screen h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #00d4ff;
-        }
+        .login-screen h2 { text-align: center; margin-bottom: 30px; color: #00d4ff; }
         .login-screen input {
             width: 100%;
             padding: 15px;
@@ -56,198 +45,72 @@
         }
         .btn-public { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
         .btn-admin { background: #ff6b6b; color: #fff; }
-        .login-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .login-tabs button {
-            flex: 1;
-            padding: 12px;
-            background: rgba(255,255,255,0.1);
-            color: #888;
-            border: none;
-            border-radius: 8px;
-        }
+        .login-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .login-tabs button { flex: 1; padding: 12px; background: rgba(255,255,255,0.1); color: #888; border: none; border-radius: 8px; }
         .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
         .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
-        .sync-status {
-            text-align: center;
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 0.85rem;
-        }
+        .sync-status { text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; }
         .sync-status.loading { background: rgba(255,193,7,0.2); color: #ffc107; }
         .sync-status.success { background: rgba(0,255,136,0.2); color: #00ff88; }
         .sync-status.error { background: rgba(255,107,107,0.2); color: #ff6b6b; }
         
         /* 试用限制弹窗 */
         .trial-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; justify-content: center; align-items: center; z-index: 1000;
         }
         .trial-modal.show { display: flex; }
-        .trial-modal-content {
-            background: #1a1a2e;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 400px;
-        }
+        .trial-modal-content { background: #1a1a2e; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; }
         .trial-modal h3 { color: #ff6b6b; margin-bottom: 20px; }
         .trial-modal p { color: #888; line-height: 1.6; margin-bottom: 20px; }
-        .trial-modal button {
-            background: #00d4ff;
-            color: #1a1a2e;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-        }
+        .trial-modal button { background: #00d4ff; color: #1a1a2e; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; }
         
         /* 管理面板 */
-        .admin-panel {
-            display: none;
-            background: rgba(255,255,255,0.1);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 30px;
-        }
+        .admin-panel { display: none; background: rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; margin-bottom: 30px; }
         .admin-panel.show { display: block; }
         .admin-panel h2 { color: #ff6b6b; margin-bottom: 20px; }
         .admin-panel h3 { color: #00d4ff; margin: 20px 0 10px 0; }
         .admin-panel input, .admin-panel select {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 2px solid rgba(0,212,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            font-size: 14px;
+            width: 100%; padding: 12px; margin: 8px 0;
+            border: 2px solid rgba(0,212,255,0.3); border-radius: 8px;
+            background: rgba(255,255,255,0.1); color: #fff; font-size: 14px;
         }
-        .admin-panel button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            margin: 5px 5px 5px 0;
-        }
+        .admin-panel button { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin: 5px 5px 5px 0; }
         .btn-save { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
         .btn-confirm { background: #00ff88; color: #1a1a2e; font-weight: bold; }
         .btn-sync { background: #ffc107; color: #1a1a2e; }
         .btn-danger { background: #ff6b6b; color: #fff; }
         .btn-cancel { background: #666; color: #fff; }
+        .btn-refresh { background: #9b59b6; color: #fff; }
         
-        .password-list-admin {
-            background: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-        }
-        .pwd-admin-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 10px 0;
-        }
+        .password-list-admin { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 15px 0; }
+        .pwd-admin-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin: 10px 0; }
         .pwd-admin-item .info { flex: 1; }
         .pwd-admin-item .info strong { color: #00d4ff; }
         .pwd-admin-item .info small { color: #888; display: block; margin-top: 5px; }
-        .pwd-admin-item .actions button {
-            padding: 8px 15px;
-            font-size: 12px;
-        }
+        .pwd-admin-item .actions button { padding: 8px 15px; font-size: 12px; }
         .remaining { color: #00ff88; }
         .expired { color: #ff6b6b; }
         
         /* 主界面 */
         .main-content { display: none; }
         .main-content.show { display: block; }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(0,212,255,0.3);
-        }
+        .header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid rgba(0,212,255,0.3); }
         .header h1 { color: #00d4ff; font-size: 1.4rem; text-shadow: 0 0 10px rgba(0,212,255,0.5); }
         .header h2 { color: #fff; font-size: 1.2rem; margin-top: 5px; font-weight: normal; }
-        
-        .user-bar {
-            background: rgba(0,212,255,0.1);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .user-bar button {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        
+        .user-bar { background: rgba(0,212,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .user-bar button { background: rgba(255,255,255,0.1); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
         .creator { text-align: right; color: #ff6666; font-size: 0.75rem; margin-top: 30px; }
-        .card {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-        }
-        .card h2 {
-            color: #00d4ff;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-            border-bottom: 2px solid #00d4ff;
-            padding-bottom: 10px;
-        }
-        .input-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-        }
+        .card { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; margin-bottom: 20px; }
+        .card h2 { color: #00d4ff; margin-bottom: 20px; font-size: 1.3rem; border-bottom: 2px solid #00d4ff; padding-bottom: 10px; }
+        .input-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
         .input-group { display: flex; flex-direction: column; }
         .input-group label { margin-bottom: 8px; color: #ccc; font-size: 0.95rem; }
-        .input-group input {
-            padding: 12px 15px;
-            border: 2px solid rgba(0,212,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            font-size: 1rem;
-        }
+        .input-group input { padding: 12px 15px; border: 2px solid rgba(0,212,255,0.3); border-radius: 8px; background: rgba(255,255,255,0.1); color: #fff; font-size: 1rem; }
         .input-group input:focus { outline: none; border-color: #00d4ff; }
         .input-group .unit { color: #888; font-size: 0.85rem; margin-top: 5px; }
-        .btn {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #fff;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            margin-top: 20px;
-            width: 100%;
-        }
+        .btn { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; border: none; padding: 15px 40px; border-radius: 8px; font-size: 1.1rem; cursor: pointer; margin-top: 20px; width: 100%; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,212,255,0.4); }
         
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
@@ -256,74 +119,29 @@
         td { background: rgba(255,255,255,0.05); font-size: 0.9rem; }
         .result-highlight { color: #00ff88; font-weight: bold; }
         .negative { color: #ff4444 !important; font-weight: bold; }
-        .formula-note {
-            background: rgba(255,193,7,0.2);
-            border-left: 4px solid #ffc107;
-            padding: 15px;
-            margin: 15px 0;
-            border-radius: 0 8px 8px 0;
-        }
+        .formula-note { background: rgba(255,193,7,0.2); border-left: 4px solid #ffc107; padding: 15px; margin: 15px 0; border-radius: 0 8px 8px 0; }
         .formula-note p { margin: 5px 0; font-size: 0.9rem; color: #ffc107; }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: rgba(0,212,255,0.1);
-            border-radius: 8px;
-            margin: 5px 0;
-        }
+        .info-row { display: flex; justify-content: space-between; padding: 10px; background: rgba(0,212,255,0.1); border-radius: 8px; margin: 5px 0; }
         .table-wrapper { overflow-x: auto; margin-top: 15px; }
         .table-wrapper table { min-width: 800px; }
-        
-        /* 参数说明样式 */
-        .param-hint {
-            background: rgba(0,212,255,0.1);
-            border-left: 3px solid #00d4ff;
-            padding: 10px 15px;
-            margin: 8px 0;
-            border-radius: 0 8px 8px 0;
-            font-size: 0.85rem;
-            color: #aaa;
-        }
+        .param-hint { background: rgba(0,212,255,0.1); border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 8px 0; border-radius: 0 8px 8px 0; font-size: 0.85rem; color: #aaa; }
         .param-hint strong { color: #00d4ff; }
         
         /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,212,255,0.9);
-            color: #1a1a2e;
-            padding: 15px 30px;
-            border-radius: 10px;
-            display: none;
-            z-index: 1000;
-        }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,212,255,0.9); color: #1a1a2e; padding: 15px 30px; border-radius: 10px; display: none; z-index: 1000; }
         .toast.show { display: block; }
         .toast.error { background: rgba(255,107,107,0.9); color: #fff; }
         
         /* 加载 */
         .loading { display: none; text-align: center; padding: 40px; }
         .loading.show { display: block; }
-        .spinner {
-            border: 4px solid rgba(255,255,255,0.1);
-            border-top: 4px solid #00d4ff;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
+        .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #00d4ff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p style="margin-top: 20px;">加载中...</p>
-        </div>
+        <div class="loading" id="loading"><div class="spinner"></div><p style="margin-top: 20px;">加载中...</p></div>
         
         <!-- 登录界面 -->
         <div class="login-screen" id="loginScreen">
@@ -334,7 +152,6 @@
                 <button onclick="switchTab('admin')">管理账户</button>
             </div>
             
-            <!-- 公用账户 - 不显示密码列表 -->
             <div id="publicLogin">
                 <p style="color:#888;text-align:center;margin-bottom:15px;">输入公用密码登录</p>
                 <input type="password" id="password" placeholder="请输入密码">
@@ -342,7 +159,6 @@
                 <button class="btn-public" onclick="loginPublic()">登录</button>
             </div>
             
-            <!-- 管理账户 -->
             <div id="adminLogin" style="display:none;">
                 <input type="password" id="adminPassword" placeholder="管理密码">
                 <div class="error-msg" id="adminErrorMsg">密码错误</div>
@@ -355,9 +171,7 @@
             <div class="trial-modal-content">
                 <h3>⚠️ 该密码已用完</h3>
                 <p>此密码的试用次数已用完。<br><br>如需继续使用，请联系：</p>
-                <p style="color: #00d4ff; font-size: 18px; font-weight: bold;">
-                    四川交建智能装备分公司<br>常彬
-                </p>
+                <p style="color: #00d4ff; font-size: 18px; font-weight: bold;">四川交建智能装备分公司<br>常彬</p>
                 <button onclick="closeTrialModal()">我知道了</button>
             </div>
         </div>
@@ -366,9 +180,8 @@
         <div class="admin-panel" id="adminPanel">
             <h2>⚙️ 密码管理</h2>
             
-            <!-- 同步按钮 -->
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button class="btn-sync" onclick="syncToCloud()" style="flex:1;">☁️ 同步到云端</button>
+            <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                <button class="btn-refresh" onclick="forceReload()" style="flex:1;">🔄 重置本地数据</button>
                 <button class="btn-cancel" onclick="logout()" style="flex:1;">返回登录</button>
             </div>
             
@@ -383,15 +196,12 @@
                     <input type="number" id="newPwdUses" value="10" min="1">
                 </div>
             </div>
-            <!-- 添加确认按钮 -->
             <div style="margin-top: 15px;">
                 <button class="btn-confirm" onclick="addPassword()">✅ 确认添加</button>
             </div>
             
             <h3>📋 当前密码列表</h3>
-            <div class="password-list-admin" id="pwdListAdmin">
-                <!-- 动态生成 -->
-            </div>
+            <div class="password-list-admin" id="pwdListAdmin"></div>
             
             <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
             <h3>🔐 修改管理密码</h3>
@@ -407,7 +217,11 @@
             </div>
             <div style="margin-top:15px;">
                 <button class="btn-save" onclick="updateAdminPassword()">💾 保存管理密码</button>
-                <span style="color:#888;font-size:0.85rem;margin-left:10px;">(保存后请同步到云端)</span>
+            </div>
+            
+            <div class="formula-note" style="margin-top:20px;">
+                <p><strong>⚠️ 重要提示：</strong></p>
+                <p>数据保存在本地浏览器。请联系常彬进行云端同步。</p>
             </div>
         </div>
         
@@ -483,7 +297,6 @@
                     <p>📌 第二掏槽：布眼距离 = a₁ + <span id="stepA_val">0.7</span>，孔底位置 = d₁ + <span id="stepD_val">1.2</span></p>
                     <p>📌 第三掏槽 = 第二掏槽 + 步长，以此类推...</p>
                 </div>
-                <!-- 计算按钮移到此处 -->
                 <button class="btn" onclick="calculate()">🧮 计算</button>
             </div>
             
@@ -510,16 +323,9 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>名称</th>
-                                <th>布眼距离(a)</th>
-                                <th>孔底位置(d)</th>
-                                <th>相对底边(e)</th>
-                                <th>开挖深度(c)</th>
-                                <th>开挖角度(∠B)</th>
-                                <th class="result-highlight">台车输入(∠A')</th>
-                                <th>剩余底边(a')</th>
-                                <th>共需空间</th>
-                                <th>剩余位置</th>
+                                <th>名称</th><th>布眼距离(a)</th><th>孔底位置(d)</th><th>相对底边(e)</th>
+                                <th>开挖深度(c)</th><th>开挖角度(∠B)</th><th class="result-highlight">台车输入(∠A')</th>
+                                <th>剩余底边(a')</th><th>共需空间</th><th>剩余位置</th>
                             </tr>
                         </thead>
                         <tbody id="resultTable"></tbody>
@@ -537,9 +343,14 @@
     <div class="toast" id="toast"></div>
     
     <script>
-        // ====== 云端数据配置 ======
-        const CLOUD_DATA_URL = 'https://raw.githubusercontent.com/changbin168/tunnel-drill-calculator/main/app_data.json';
-        const CLOUD_UPDATE_SCRIPT = 'sync_data.py'; // 本地Python脚本
+        // ====== 默认数据 ======
+        const DEFAULT_DATA = {
+            passwords: [
+                { pwd: 'Cb17612833821.', uses: 10, used: 0 },
+                { pwd: '456', uses: 5, used: 0 }
+            ],
+            adminPassword: 'admin2026'
+        };
         
         // ====== 状态 ======
         let state = {
@@ -549,8 +360,7 @@
             usedPassword: '',
             passwords: [],
             adminPassword: 'admin2026',
-            deviceId: localStorage.getItem('tunnel_device_id') || '',
-            cloudLoaded: false
+            deviceId: localStorage.getItem('tunnel_device_id') || ''
         };
         
         // ====== 工具函数 ======
@@ -561,70 +371,83 @@
             setTimeout(() => toast.className = 'toast', 3000);
         }
         
-        function showLoading(show = true) {
-            document.getElementById('loading').className = show ? 'loading show' : 'loading';
-        }
-        
         function showSyncStatus(msg, type) {
             const el = document.getElementById('syncStatus');
-            el.textContent = msg;
-            el.className = 'sync-status ' + type;
+            if (el) {
+                el.textContent = msg;
+                el.className = 'sync-status ' + type;
+            }
         }
         
         // ====== 数据持久化 ======
+        const STORAGE_KEY = 'tunnel_app_data_v2';
+        
         function saveToLocal() {
             const data = {
                 passwords: state.passwords,
-                adminPassword: state.adminPassword
+                adminPassword: state.adminPassword,
+                lastUpdate: Date.now()
             };
-            localStorage.setItem('tunnel_app_data', JSON.stringify(data));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            console.log('Data saved:', data);
         }
         
         function loadFromLocal() {
-            const saved = localStorage.getItem('tunnel_app_data');
+            const saved = localStorage.getItem(STORAGE_KEY);
+            console.log('Loading from localStorage...');
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
-                    state.passwords = data.passwords || [];
-                    state.adminPassword = data.adminPassword || 'admin2026';
-                    return true;
+                    console.log('Loaded data:', data);
+                    return data;
                 } catch (e) {
-                    console.error('Load local failed:', e);
+                    console.error('Parse error:', e);
                 }
             }
-            return false;
+            console.log('No local data found');
+            return null;
         }
         
-        // 加载默认数据
-        function loadDefaults() {
-            state.passwords = [
-                { pwd: 'Cb17612833821.', uses: 10, used: 0 },
-                { pwd: '456', uses: 5, used: 0 }
-            ];
-            state.adminPassword = 'admin2026';
+        function forceReload() {
+            // 重置为默认数据
+            state.passwords = JSON.parse(JSON.stringify(DEFAULT_DATA.passwords));
+            state.adminPassword = DEFAULT_DATA.adminPassword;
+            saveToLocal();
+            renderAdminPasswordList();
+            showToast('已重置为默认数据');
         }
         
-        // 从云端加载
-        async function loadFromCloud() {
-            try {
-                showSyncStatus('正在从云端加载...', 'loading');
-                const resp = await fetch(CLOUD_DATA_URL + '?t=' + Date.now());
-                if (resp.ok) {
-                    const data = await resp.json();
-                    if (data.passwords && data.passwords.length > 0) {
-                        state.passwords = data.passwords;
-                        state.adminPassword = data.adminPassword || 'admin2026';
-                        saveToLocal();
-                        showSyncStatus('云端数据已同步', 'success');
-                        state.cloudLoaded = true;
-                        return true;
-                    }
-                }
-            } catch (e) {
-                console.error('Cloud load failed:', e);
+        // ====== 初始化 ======
+        function init() {
+            if (!state.deviceId) {
+                state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('tunnel_device_id', state.deviceId);
             }
-            showSyncStatus('使用本地数据', 'error');
-            return false;
+            
+            // 加载本地数据
+            const localData = loadFromLocal();
+            if (localData) {
+                state.passwords = localData.passwords || DEFAULT_DATA.passwords;
+                state.adminPassword = localData.adminPassword || DEFAULT_DATA.adminPassword;
+            } else {
+                state.passwords = JSON.parse(JSON.stringify(DEFAULT_DATA.passwords));
+                state.adminPassword = DEFAULT_DATA.adminPassword;
+                saveToLocal();
+            }
+            
+            console.log('App initialized with passwords:', state.passwords);
+            console.log('Admin password:', state.adminPassword);
+            
+            // 事件监听
+            document.getElementById('width').addEventListener('input', updateL);
+            document.getElementById('stepA').addEventListener('input', function() {
+                document.getElementById('stepA_val').textContent = this.value;
+            });
+            document.getElementById('stepD').addEventListener('input', function() {
+                document.getElementById('stepD_val').textContent = this.value;
+            });
+            
+            updateL();
         }
         
         // ====== 登录相关 ======
@@ -643,12 +466,13 @@
         
         function loginPublic() {
             const password = document.getElementById('password').value;
+            console.log('Login attempt with:', password);
+            console.log('Available passwords:', state.passwords);
             
-            // 查找密码
             const pwdObj = state.passwords.find(p => p.pwd === password);
             
             if (!pwdObj) {
-                document.getElementById('errorMsg').textContent = '密码错误';
+                document.getElementById('errorMsg').textContent = '密码错误，当前可用密码：' + state.passwords.map(p => p.pwd).join(', ');
                 document.getElementById('errorMsg').style.display = 'block';
                 return;
             }
@@ -658,19 +482,18 @@
                 return;
             }
             
-            // 使用密码
             pwdObj.used++;
             state.usedPassword = password;
-            
-            // 保存到本地
             saveToLocal();
             
-            showToast(`登录成功！剩余 ${pwdObj.uses - pwdObj.used} 次`);
+            showToast(`登录成功！密码 "${password}" 剩余 ${pwdObj.uses - pwdObj.used} 次`);
             showMain();
         }
         
         function loginAdmin() {
             const password = document.getElementById('adminPassword').value;
+            console.log('Admin login attempt:', password);
+            console.log('Expected:', state.adminPassword);
             
             if (password !== state.adminPassword) {
                 document.getElementById('adminErrorMsg').style.display = 'block';
@@ -735,7 +558,10 @@
             }
             
             state.passwords.push({ pwd, uses, used: 0 });
-            saveToLocal(); // 立即保存到本地
+            saveToLocal();
+            
+            console.log('Password added:', pwd);
+            console.log('All passwords now:', state.passwords);
             
             showToast(`密码 "${pwd}" 添加成功，可用 ${uses} 次`);
             
@@ -746,7 +572,7 @@
         
         function deletePassword(pwd) {
             state.passwords = state.passwords.filter(p => p.pwd !== pwd);
-            saveToLocal(); // 立即保存到本地
+            saveToLocal();
             showToast(`密码 "${pwd}" 已删除`);
             renderAdminPasswordList();
         }
@@ -755,7 +581,7 @@
             const pwdObj = state.passwords.find(p => p.pwd === pwd);
             if (pwdObj) {
                 pwdObj.used = 0;
-                saveToLocal(); // 立即保存到本地
+                saveToLocal();
                 showToast(`密码 "${pwd}" 已重置`);
                 renderAdminPasswordList();
             }
@@ -802,36 +628,16 @@
             }
             
             state.adminPassword = newPwd;
-            saveToLocal(); // 立即保存到本地
+            saveToLocal();
             
-            showToast('管理密码已更新（请同步到云端）');
+            console.log('Admin password changed to:', newPwd);
+            
+            showToast('管理密码已更新为：' + newPwd);
             document.getElementById('newAdminPwd').value = '';
             document.getElementById('confirmAdminPwd').value = '';
         }
         
-        // 同步到云端（提示用户）
-        function syncToCloud() {
-            showToast('请运行 sync_data.py 脚本同步到云端');
-            // 生成可复制的JSON
-            const data = {
-                passwords: state.passwords,
-                adminPassword: state.adminPassword
-            };
-            const jsonStr = JSON.stringify(data, null, 2);
-            
-            // 创建一个可下载的JSON文件
-            const blob = new Blob([jsonStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'tunnel_app_data.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            
-            showToast('数据已导出，请运行Python脚本同步');
-        }
-        
-        // ====== v2计算逻辑 ======
+        // ====== 计算逻辑 ======
         function updateL() {
             const width = parseFloat(document.getElementById('width').value) || 0;
             document.getElementById('L_auto').textContent = (width / 2).toFixed(2);
@@ -885,35 +691,6 @@
                     <td class="${parseFloat(row.remain) < 0 ? 'negative' : ''}">${row.remain}</td>
                 </tr>
             `).join('');
-        }
-        
-        // ====== 初始化 ======
-        async function init() {
-            if (!state.deviceId) {
-                state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('tunnel_device_id', state.deviceId);
-            }
-            
-            // 先尝试从云端加载
-            const cloudOk = await loadFromCloud();
-            
-            // 如果云端加载失败，从本地加载
-            if (!cloudOk) {
-                if (!loadFromLocal()) {
-                    // 本地也没有，加载默认
-                    loadDefaults();
-                }
-            }
-            
-            document.getElementById('width').addEventListener('input', updateL);
-            document.getElementById('stepA').addEventListener('input', function() {
-                document.getElementById('stepA_val').textContent = this.value;
-            });
-            document.getElementById('stepD').addEventListener('input', function() {
-                document.getElementById('stepD_val').textContent = this.value;
-            });
-            
-            updateL();
         }
         
         init();
