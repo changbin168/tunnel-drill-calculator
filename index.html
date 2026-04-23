@@ -1034,12 +1034,13 @@
                 </tr>
             `).join('');
             
-            // 绘制掏槽俯视图
-            drawTopView(a1, d1, stepA, stepD, width);
+            // 绘制掏槽俯视图（传入角度数组）
+            const angles = rows.map(r => parseFloat(r.angleA));
+            drawTopView(a1, d1, stepA, stepD, width, angles);
         }
         
         // ====== 掏槽俯视图绘制 ======
-        function drawTopView(a1, d1, stepA, stepD, tunnelWidth) {
+        function drawTopView(a1, d1, stepA, stepD, tunnelWidth, angles) {
             const canvas = document.getElementById('topViewCanvas');
             const ctx = canvas.getContext('2d');
             const W = canvas.width;
@@ -1056,8 +1057,8 @@
             const maxD = d1 + 4 * stepD + 0.3; // 最大孔底距离
             
             // 计算比例尺
-            const scaleX = (W * 0.75) / tunnelWidth;  
-            const scaleY = (H * 0.75) / maxD;         
+            const scaleX = (W * 0.7) / tunnelWidth;  
+            const scaleY = (H * 0.7) / maxD;         
             const scale = Math.min(scaleX, scaleY);
             
             const centerX = W / 2;
@@ -1072,7 +1073,7 @@
             ctx.lineWidth = 2;
             ctx.strokeRect(centerX - halfWidth * scale, faceY, tunnelWidth * scale, maxD * scale);
             
-            // 绘制中心线
+            // 绘制中心线（推进方向）
             ctx.strokeStyle = '#666';
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
@@ -1090,7 +1091,7 @@
             ctx.lineTo(centerX + halfWidth * scale, faceY);
             ctx.stroke();
             
-            // 绘制左侧壁（左边线）
+            // 绘制左侧壁
             ctx.strokeStyle = '#00d4ff';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -1098,40 +1099,36 @@
             ctx.lineTo(centerX - halfWidth * scale, endY);
             ctx.stroke();
             
-            // 绘制右侧壁（右边线）
+            // 绘制右侧壁
             ctx.beginPath();
             ctx.moveTo(centerX + halfWidth * scale, faceY);
             ctx.lineTo(centerX + halfWidth * scale, endY);
             ctx.stroke();
             
-            // 绘制掏槽眼（左右对称，向中心倾斜交汇）
+            // 绘制掏槽眼（使用实际角度计算孔底位置）
             for (let i = 0; i < 5; i++) {
                 const a = a1 + i * stepA;  // 布眼距离（离中心线距离）
                 const d = d1 + i * stepD;  // 孔底距离（推进深度）
+                const angleA = angles[i] || 0;  // 水平投影角度（度）
                 const color = colors[i % colors.length];
                 
-                // 左侧掏槽眼：从左侧孔口向中心方向倾斜
+                // 根据角度计算孔底X偏移量
+                // angleA是掏槽眼与中心线的夹角，孔底X偏移 = d * sin(angleA)
+                const offsetX = d * Math.sin(angleA * Math.PI / 180) * scale;
+                
+                // 左侧掏槽眼：孔口在左侧壁上，孔底向中心偏移
                 const leftX = centerX - a * scale;  // 左侧孔口X
-                const leftEndX = centerX - 0.3 * scale;  // 左侧孔底X（向中心偏移）
+                const leftEndX = leftX + offsetX;   // 左侧孔底X（向中心偏移）
                 const leftEndY = faceY + d * scale;  // 左侧孔底Y
                 
-                drawInclinedHole(ctx, leftX, faceY, leftEndX, leftEndY, color, i + 1, a, d, '左');
+                drawInclinedHole(ctx, leftX, faceY, leftEndX, leftEndY, color, i + 1, a, d, angleA, '左');
                 
-                // 右侧掏槽眼：从右侧孔口向中心方向倾斜
+                // 右侧掏槽眼：孔口在右侧壁上，孔底向中心偏移
                 const rightX = centerX + a * scale;  // 右侧孔口X
-                const rightEndX = centerX + 0.3 * scale;  // 右侧孔底X（向中心偏移）
+                const rightEndX = rightX - offsetX;   // 右侧孔底X（向中心偏移）
                 const rightEndY = faceY + d * scale;  // 右侧孔底Y
                 
-                drawInclinedHole(ctx, rightX, faceY, rightEndX, rightEndY, color, i + 1, a, d, '右');
-                
-                // 绘制交汇区域（小圆圈表示两孔交汇处）
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 1;
-                ctx.globalAlpha = 0.5;
-                ctx.beginPath();
-                ctx.arc(centerX, leftEndY, 3, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.globalAlpha = 1;
+                drawInclinedHole(ctx, rightX, faceY, rightEndX, rightEndY, color, i + 1, a, d, angleA, '右');
             }
             
             // 绘制图例
@@ -1165,7 +1162,7 @@
         }
         
         // 绘制倾斜的掏槽眼
-        function drawInclinedHole(ctx, x1, y1, x2, y2, color, level, a, d, side) {
+        function drawInclinedHole(ctx, x1, y1, x2, y2, color, level, a, d, angle, side) {
             // 孔口（掌子面上的位置）- 大圆点
             ctx.fillStyle = color;
             ctx.beginPath();
@@ -1189,13 +1186,13 @@
             ctx.stroke();
             
             // 箭头（指向孔底）
-            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const angleRad = Math.atan2(y2 - y1, x2 - x1);
             const arrowSize = 6;
             ctx.fillStyle = color;
             ctx.beginPath();
             ctx.moveTo(x2, y2);
-            ctx.lineTo(x2 - arrowSize * Math.cos(angle - 0.4), y2 - arrowSize * Math.sin(angle - 0.4));
-            ctx.lineTo(x2 - arrowSize * Math.cos(angle + 0.4), y2 - arrowSize * Math.sin(angle + 0.4));
+            ctx.lineTo(x2 - arrowSize * Math.cos(angleRad - 0.4), y2 - arrowSize * Math.sin(angleRad - 0.4));
+            ctx.lineTo(x2 - arrowSize * Math.cos(angleRad + 0.4), y2 - arrowSize * Math.sin(angleRad + 0.4));
             ctx.closePath();
             ctx.fill();
             
@@ -1204,15 +1201,15 @@
             ctx.font = 'bold 10px Arial';
             if (side === '右') {
                 ctx.textAlign = 'left';
-                ctx.fillText(`a${level} ${a.toFixed(1)}m`, x1 + 10, y1 - 3);
+                ctx.fillText(`a${level}=${a.toFixed(1)}m`, x1 + 10, y1 - 3);
                 ctx.font = '9px Arial';
-                ctx.fillText(`d${level} ${d.toFixed(1)}m`, x2 + 10, y2);
+                ctx.fillText(`d${level}=${d.toFixed(1)}m θ=${angle.toFixed(1)}°`, x2 + 10, y2);
             } else {
                 ctx.textAlign = 'right';
                 ctx.font = 'bold 10px Arial';
-                ctx.fillText(`${a.toFixed(1)}m a${level}`, x1 - 10, y1 - 3);
+                ctx.fillText(`a${level}=${a.toFixed(1)}m`, x1 - 10, y1 - 3);
                 ctx.font = '9px Arial';
-                ctx.fillText(`${d.toFixed(1)}m d${level}`, x2 - 10, y2);
+                ctx.fillText(`d${level}=${d.toFixed(1)}m θ=${angle.toFixed(1)}°`, x2 - 10, y2);
             }
         }
         
