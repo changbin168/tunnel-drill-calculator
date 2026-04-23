@@ -1057,13 +1057,11 @@
             const halfWidth = tunnelWidth / 2;
             const maxDepth = b + 0.5; // 最大深度 = 开挖进尺 + 余量
             
-            // 计算比例尺
-            const scaleX = (W * 0.75) / tunnelWidth;  
-            const scaleY = (H * 0.7) / maxDepth;         
-            const scale = Math.min(scaleX, scaleY);
+            // 计算比例尺（宽度方向优先，让掏槽眼分布更清晰）
+            const scale = (W * 0.85) / tunnelWidth;
             
             const centerX = W / 2;
-            const faceY = H * 0.88;  // 掌子面Y位置（底部）
+            const faceY = H * 0.9;  // 掌子面Y位置（底部）
             const topY = faceY - maxDepth * scale;  // 顶部Y位置
             
             // 颜色数组（从内到外）
