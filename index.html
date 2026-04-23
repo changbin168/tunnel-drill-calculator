@@ -71,6 +71,16 @@
         }
         .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
         .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
+        .sync-status {
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+        .sync-status.loading { background: rgba(255,193,7,0.2); color: #ffc107; }
+        .sync-status.success { background: rgba(0,255,136,0.2); color: #00ff88; }
+        .sync-status.error { background: rgba(255,107,107,0.2); color: #ff6b6b; }
         
         /* 试用限制弹窗 */
         .trial-modal {
@@ -136,6 +146,7 @@
         }
         .btn-save { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
         .btn-confirm { background: #00ff88; color: #1a1a2e; font-weight: bold; }
+        .btn-sync { background: #ffc107; color: #1a1a2e; }
         .btn-danger { background: #ff6b6b; color: #fff; }
         .btn-cancel { background: #666; color: #fff; }
         
@@ -317,6 +328,7 @@
         <!-- 登录界面 -->
         <div class="login-screen" id="loginScreen">
             <h2>🔐 账户登录</h2>
+            <div id="syncStatus" class="sync-status"></div>
             <div class="login-tabs">
                 <button class="active" onclick="switchTab('public')">公用账户</button>
                 <button onclick="switchTab('admin')">管理账户</button>
@@ -354,6 +366,12 @@
         <div class="admin-panel" id="adminPanel">
             <h2>⚙️ 密码管理</h2>
             
+            <!-- 同步按钮 -->
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <button class="btn-sync" onclick="syncToCloud()" style="flex:1;">☁️ 同步到云端</button>
+                <button class="btn-cancel" onclick="logout()" style="flex:1;">返回登录</button>
+            </div>
+            
             <h3>➕ 添加新密码</h3>
             <div class="input-grid">
                 <div class="input-group">
@@ -366,9 +384,8 @@
                 </div>
             </div>
             <!-- 添加确认按钮 -->
-            <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <div style="margin-top: 15px;">
                 <button class="btn-confirm" onclick="addPassword()">✅ 确认添加</button>
-                <button class="btn-cancel" onclick="logout()">返回</button>
             </div>
             
             <h3>📋 当前密码列表</h3>
@@ -388,7 +405,10 @@
                     <input type="text" id="confirmAdminPwd" placeholder="确认新密码">
                 </div>
             </div>
-            <button class="btn-save" onclick="updateAdminPassword()" style="margin-top: 10px;">保存管理密码</button>
+            <div style="margin-top:15px;">
+                <button class="btn-save" onclick="updateAdminPassword()">💾 保存管理密码</button>
+                <span style="color:#888;font-size:0.85rem;margin-left:10px;">(保存后请同步到云端)</span>
+            </div>
         </div>
         
         <!-- 主界面 -->
@@ -517,18 +537,20 @@
     <div class="toast" id="toast"></div>
     
     <script>
+        // ====== 云端数据配置 ======
+        const CLOUD_DATA_URL = 'https://raw.githubusercontent.com/changbin168/tunnel-drill-calculator/main/app_data.json';
+        const CLOUD_UPDATE_SCRIPT = 'sync_data.py'; // 本地Python脚本
+        
         // ====== 状态 ======
         let state = {
             loginType: 'public',
             isLoggedIn: false,
             isAdmin: false,
             usedPassword: '',
-            passwords: [
-                { pwd: 'Cb17612833821.', uses: 10, used: 0 },
-                { pwd: '456', uses: 5, used: 0 }
-            ],
+            passwords: [],
             adminPassword: 'admin2026',
-            deviceId: localStorage.getItem('tunnel_device_id') || ''
+            deviceId: localStorage.getItem('tunnel_device_id') || '',
+            cloudLoaded: false
         };
         
         // ====== 工具函数 ======
@@ -541,6 +563,68 @@
         
         function showLoading(show = true) {
             document.getElementById('loading').className = show ? 'loading show' : 'loading';
+        }
+        
+        function showSyncStatus(msg, type) {
+            const el = document.getElementById('syncStatus');
+            el.textContent = msg;
+            el.className = 'sync-status ' + type;
+        }
+        
+        // ====== 数据持久化 ======
+        function saveToLocal() {
+            const data = {
+                passwords: state.passwords,
+                adminPassword: state.adminPassword
+            };
+            localStorage.setItem('tunnel_app_data', JSON.stringify(data));
+        }
+        
+        function loadFromLocal() {
+            const saved = localStorage.getItem('tunnel_app_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    state.passwords = data.passwords || [];
+                    state.adminPassword = data.adminPassword || 'admin2026';
+                    return true;
+                } catch (e) {
+                    console.error('Load local failed:', e);
+                }
+            }
+            return false;
+        }
+        
+        // 加载默认数据
+        function loadDefaults() {
+            state.passwords = [
+                { pwd: 'Cb17612833821.', uses: 10, used: 0 },
+                { pwd: '456', uses: 5, used: 0 }
+            ];
+            state.adminPassword = 'admin2026';
+        }
+        
+        // 从云端加载
+        async function loadFromCloud() {
+            try {
+                showSyncStatus('正在从云端加载...', 'loading');
+                const resp = await fetch(CLOUD_DATA_URL + '?t=' + Date.now());
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.passwords && data.passwords.length > 0) {
+                        state.passwords = data.passwords;
+                        state.adminPassword = data.adminPassword || 'admin2026';
+                        saveToLocal();
+                        showSyncStatus('云端数据已同步', 'success');
+                        state.cloudLoaded = true;
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error('Cloud load failed:', e);
+            }
+            showSyncStatus('使用本地数据', 'error');
+            return false;
         }
         
         // ====== 登录相关 ======
@@ -577,6 +661,9 @@
             // 使用密码
             pwdObj.used++;
             state.usedPassword = password;
+            
+            // 保存到本地
+            saveToLocal();
             
             showToast(`登录成功！剩余 ${pwdObj.uses - pwdObj.used} 次`);
             showMain();
@@ -648,6 +735,8 @@
             }
             
             state.passwords.push({ pwd, uses, used: 0 });
+            saveToLocal(); // 立即保存到本地
+            
             showToast(`密码 "${pwd}" 添加成功，可用 ${uses} 次`);
             
             document.getElementById('newPwd').value = '';
@@ -657,6 +746,7 @@
         
         function deletePassword(pwd) {
             state.passwords = state.passwords.filter(p => p.pwd !== pwd);
+            saveToLocal(); // 立即保存到本地
             showToast(`密码 "${pwd}" 已删除`);
             renderAdminPasswordList();
         }
@@ -665,6 +755,7 @@
             const pwdObj = state.passwords.find(p => p.pwd === pwd);
             if (pwdObj) {
                 pwdObj.used = 0;
+                saveToLocal(); // 立即保存到本地
                 showToast(`密码 "${pwd}" 已重置`);
                 renderAdminPasswordList();
             }
@@ -711,9 +802,33 @@
             }
             
             state.adminPassword = newPwd;
-            showToast('管理密码已更新');
+            saveToLocal(); // 立即保存到本地
+            
+            showToast('管理密码已更新（请同步到云端）');
             document.getElementById('newAdminPwd').value = '';
             document.getElementById('confirmAdminPwd').value = '';
+        }
+        
+        // 同步到云端（提示用户）
+        function syncToCloud() {
+            showToast('请运行 sync_data.py 脚本同步到云端');
+            // 生成可复制的JSON
+            const data = {
+                passwords: state.passwords,
+                adminPassword: state.adminPassword
+            };
+            const jsonStr = JSON.stringify(data, null, 2);
+            
+            // 创建一个可下载的JSON文件
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tunnel_app_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showToast('数据已导出，请运行Python脚本同步');
         }
         
         // ====== v2计算逻辑 ======
@@ -773,10 +888,21 @@
         }
         
         // ====== 初始化 ======
-        function init() {
+        async function init() {
             if (!state.deviceId) {
                 state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('tunnel_device_id', state.deviceId);
+            }
+            
+            // 先尝试从云端加载
+            const cloudOk = await loadFromCloud();
+            
+            // 如果云端加载失败，从本地加载
+            if (!cloudOk) {
+                if (!loadFromLocal()) {
+                    // 本地也没有，加载默认
+                    loadDefaults();
+                }
             }
             
             document.getElementById('width').addEventListener('input', updateL);
