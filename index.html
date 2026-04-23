@@ -336,6 +336,118 @@
             color: #ccc;
             line-height: 1.8;
         }
+        
+        /* 手机端适配 */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            /* 标题区域 */
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .header .title-text h1 {
+                font-size: 1.2rem;
+                margin-bottom: 5px;
+            }
+            .header .title-text h2 {
+                font-size: 1rem;
+            }
+            .header img {
+                max-height: 40px;
+            }
+            
+            /* Logo区域 */
+            .header {
+                padding: 10px 0;
+            }
+            
+            /* 卡片 */
+            .card {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+            .card h2 {
+                font-size: 1.1rem;
+                margin-bottom: 15px;
+            }
+            .card h3 {
+                font-size: 1rem;
+            }
+            
+            /* 输入框网格 - 单列全宽 */
+            .input-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            .input-group label {
+                font-size: 0.9rem;
+            }
+            .input-group input {
+                padding: 14px 12px;
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+            .input-group .unit,
+            .input-group .param-hint {
+                font-size: 0.75rem;
+            }
+            
+            /* 按钮全宽 */
+            .btn {
+                width: 100%;
+                padding: 14px;
+                font-size: 1rem;
+            }
+            .user-bar {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            /* 表格 */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .table-wrapper table {
+                min-width: 700px;
+                font-size: 0.8rem;
+            }
+            .table-wrapper th,
+            .table-wrapper td {
+                padding: 8px 6px;
+                white-space: nowrap;
+            }
+            
+            /* 参数说明 */
+            .formula-note {
+                font-size: 0.8rem;
+            }
+            
+            /* 警告提示 */
+            .warning-note {
+                font-size: 0.8rem;
+            }
+            
+            /* 登录界面 */
+            .login-screen {
+                margin: 40px 10px;
+                padding: 25px;
+            }
+            
+            /* 管理面板 */
+            .admin-panel {
+                padding: 15px;
+            }
+            
+            /* 制作者 */
+            .creator {
+                text-align: center;
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 <body>
