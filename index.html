@@ -71,24 +71,6 @@
         }
         .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
         .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
-        .pwd-list {
-            margin: 15px 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .pwd-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .pwd-item span { color: #888; }
-        .pwd-item .uses { color: #00d4ff; }
-        .pwd-item .unlimited { color: #4CAF50; font-weight: bold; }
         
         /* 试用限制弹窗 */
         .trial-modal {
@@ -356,10 +338,7 @@
             
             <!-- 公用账户 -->
             <div id="publicLogin">
-                <div class="pwd-list" id="pwdList">
-                    <!-- 动态显示可用密码 -->
-                </div>
-                <input type="password" id="password" placeholder="选择或输入密码">
+                <input type="password" id="password" placeholder="请输入密码">
                 <div class="error-msg" id="errorMsg">密码错误或已用完</div>
                 <button class="btn-public" onclick="loginPublic()">登录</button>
             </div>
@@ -646,47 +625,6 @@
             document.getElementById('adminLogin').style.display = type === 'admin' ? 'block' : 'none';
             document.getElementById('errorMsg').style.display = 'none';
             document.getElementById('adminErrorMsg').style.display = 'none';
-            
-            if (type === 'public') {
-                renderPasswordList();
-            }
-        }
-        
-        function renderPasswordList() {
-            const list = document.getElementById('pwdList');
-            const available = state.passwords.filter(p => p.used < p.uses || p.uses === 0);
-            const expired = state.passwords.filter(p => p.used >= p.uses && p.uses !== 0);
-            
-            let html = '';
-            
-            if (available.length > 0) {
-                html += '<p style="color:#888;margin-bottom:10px;">可用密码：</p>';
-                available.forEach(p => {
-                    const isUnlimited = p.uses === 0;
-                    const remaining = isUnlimited ? '无限次' : (p.uses - p.used) + '/' + p.uses;
-                    const cls = isUnlimited ? 'unlimited' : 'uses';
-                    html += `<div class="pwd-item">
-                        <span>${p.pwd}</span>
-                        <span class="${cls}">剩余 ${remaining} 次</span>
-                    </div>`;
-                });
-            }
-            
-            if (expired.length > 0) {
-                html += '<p style="color:#ff6b6b;margin:15px 0 10px 0;">已用完：</p>';
-                expired.forEach(p => {
-                    html += `<div class="pwd-item" style="opacity:0.5;">
-                        <span>${p.pwd}</span>
-                        <span style="color:#ff6b6b;">已用完</span>
-                    </div>`;
-                });
-            }
-            
-            if (state.passwords.length === 0) {
-                html = '<p style="color:#888;text-align:center;">暂无可用密码</p>';
-            }
-            
-            list.innerHTML = html;
         }
         
         function loginPublic() {
@@ -769,7 +707,6 @@
             document.getElementById('mainContent').classList.remove('show');
             document.getElementById('password').value = '';
             document.getElementById('adminPassword').value = '';
-            renderPasswordList();
         }
         
         function closeTrialModal() {
@@ -939,7 +876,6 @@
             });
             
             updateL();
-            renderPasswordList();
         }
         
         init();
