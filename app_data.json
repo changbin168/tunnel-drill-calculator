@@ -1,0 +1,16 @@
+{
+  "passwords": [
+    {
+      "pwd": "Cb17612833821.",
+      "uses": 10,
+      "used": 0
+    },
+    {
+      "pwd": "456",
+      "uses": 5,
+      "used": 0
+    }
+  ],
+  "adminPassword": "admin2026",
+  "version": "1.0"
+}
