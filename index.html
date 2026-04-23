@@ -578,6 +578,26 @@
             }
         }
 
+        // 转换旧格式数据到新格式
+        function convertLegacyData(content) {
+            const newData = {
+                adminPassword: content.adminPassword || 'admin2026',
+                publicPasswords: []
+            };
+            
+            // 处理旧格式 (passwords) 或新格式 (publicPasswords)
+            const pwdList = content.publicPasswords || content.passwords || [];
+            for (const p of pwdList) {
+                newData.publicPasswords.push({
+                    password: p.password || p.pwd || '',
+                    uses: p.uses || 10,
+                    used: p.used || 0
+                });
+            }
+            
+            return newData;
+        }
+
         async function downloadFromCloud() {
             showToast('正在下载...', 'info');
             
@@ -591,7 +611,8 @@
                 const data = await resp.json();
                 const content = JSON.parse(atob(data.content));
                 
-                appData = content;
+                // 转换格式（兼容旧数据）
+                appData = convertLegacyData(content);
                 saveData();
                 
                 showToast('📥 下载成功！', 'success');
