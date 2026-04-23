@@ -71,23 +71,6 @@
         }
         .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
         .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
-        .pwd-list {
-            margin: 15px 0;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .pwd-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            border-radius: 8px;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-        .pwd-item span { color: #888; }
-        .pwd-item .uses { color: #00d4ff; }
         
         /* 试用限制弹窗 */
         .trial-modal {
@@ -152,6 +135,7 @@
             margin: 5px 5px 5px 0;
         }
         .btn-save { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
+        .btn-confirm { background: #00ff88; color: #1a1a2e; font-weight: bold; }
         .btn-danger { background: #ff6b6b; color: #fff; }
         .btn-cancel { background: #666; color: #fff; }
         
@@ -280,6 +264,18 @@
         .table-wrapper { overflow-x: auto; margin-top: 15px; }
         .table-wrapper table { min-width: 800px; }
         
+        /* 参数说明样式 */
+        .param-hint {
+            background: rgba(0,212,255,0.1);
+            border-left: 3px solid #00d4ff;
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+        .param-hint strong { color: #00d4ff; }
+        
         /* Toast */
         .toast {
             position: fixed;
@@ -326,12 +322,10 @@
                 <button onclick="switchTab('admin')">管理账户</button>
             </div>
             
-            <!-- 公用账户 -->
+            <!-- 公用账户 - 不显示密码列表 -->
             <div id="publicLogin">
-                <div class="pwd-list" id="pwdList">
-                    <!-- 动态显示可用密码 -->
-                </div>
-                <input type="password" id="password" placeholder="选择或输入密码">
+                <p style="color:#888;text-align:center;margin-bottom:15px;">输入公用密码登录</p>
+                <input type="password" id="password" placeholder="请输入密码">
                 <div class="error-msg" id="errorMsg">密码错误或已用完</div>
                 <button class="btn-public" onclick="loginPublic()">登录</button>
             </div>
@@ -371,8 +365,9 @@
                     <input type="number" id="newPwdUses" value="10" min="1">
                 </div>
             </div>
-            <div style="margin-top: 10px;">
-                <button class="btn-save" onclick="addPassword()">➕ 添加密码</button>
+            <!-- 添加确认按钮 -->
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button class="btn-confirm" onclick="addPassword()">✅ 确认添加</button>
                 <button class="btn-cancel" onclick="logout()">返回</button>
             </div>
             
@@ -415,32 +410,37 @@
                         <label>开挖进尺 (b)</label>
                         <input type="number" id="b" value="4" step="0.01" onchange="calculate()">
                         <span class="unit">单位：米</span>
+                        <div class="param-hint"><strong>b</strong> = 每次爆破开挖的深度（米）</div>
                     </div>
                     <div class="input-group">
                         <label>推进梁长度 (c')</label>
                         <input type="number" id="c" value="7.2" step="0.01" onchange="calculate()">
                         <span class="unit">单位：米</span>
+                        <div class="param-hint"><strong>c'</strong> = 凿岩台车推进梁的总长度（米）</div>
                     </div>
                     <div class="input-group">
                         <label>隧道宽度</label>
                         <input type="number" id="width" value="16.35" step="0.01" onchange="calculate()">
                         <span class="unit">单位：米</span>
+                        <div class="param-hint"><strong>隧道宽度</strong> = 隧道横断面的总宽度（米）</div>
                     </div>
                     <div class="input-group">
                         <label>布眼间距增加值</label>
                         <input type="number" id="stepA" value="0.7" step="0.01" onchange="calculate()">
                         <span class="unit">每级增加布眼距离（米）</span>
+                        <div class="param-hint"><strong>步长A</strong> = 相邻掏槽之间布眼距离的增加值（米）</div>
                     </div>
                     <div class="input-group">
                         <label>孔底位置增加值</label>
                         <input type="number" id="stepD" value="1.2" step="0.01" onchange="calculate()">
                         <span class="unit">每级增加孔底位置（米）</span>
+                        <div class="param-hint"><strong>步长D</strong> = 相邻掏槽之间孔底位置的增加值（米）</div>
                     </div>
                 </div>
                 <div class="formula-note">
-                    <p>📌 半幅活动宽度 L = 隧道宽度 ÷ 2 = <span id="L_auto">8.175</span> 米</p>
+                    <p>📌 <strong>半幅活动宽度 L = 隧道宽度 ÷ 2</strong></p>
+                    <p>即 L = <span id="L_auto">8.175</span> 米（隧道宽度的一半）</p>
                 </div>
-                <button class="btn" onclick="calculate()">🧮 计算</button>
             </div>
             
             <div class="card">
@@ -450,21 +450,38 @@
                         <label>第一掏槽 - 布眼距离 (a₁)</label>
                         <input type="number" id="a1" value="3.3" step="0.01" onchange="calculate()">
                         <span class="unit">单位：米</span>
+                        <div class="param-hint"><strong>a₁</strong> = 第一层掏槽眼到掌子面的距离（米）</div>
                     </div>
                     <div class="input-group">
                         <label>第一掏槽 - 孔底位置 (d₁)</label>
                         <input type="number" id="d1" value="0.25" step="0.01" onchange="calculate()">
                         <span class="unit">单位：米</span>
+                        <div class="param-hint"><strong>d₁</strong> = 第一层掏槽眼孔底超出掌子面的距离（米）</div>
                     </div>
                 </div>
                 <div class="formula-note">
                     <p>📌 第二掏槽：布眼距离 = a₁ + <span id="stepA_val">0.7</span>，孔底位置 = d₁ + <span id="stepD_val">1.2</span></p>
                     <p>📌 第三掏槽 = 第二掏槽 + 步长，以此类推...</p>
                 </div>
+                <!-- 计算按钮移到此处 -->
+                <button class="btn" onclick="calculate()">🧮 计算</button>
             </div>
             
             <div class="card" id="resultCard">
                 <h2>📊 计算结果</h2>
+                <div class="formula-note">
+                    <p><strong>📐 参数说明：</strong></p>
+                    <p><strong>L</strong> = 半幅活动宽度 = 隧道宽度 ÷ 2</p>
+                    <p><strong>a</strong> = 布眼距离 = 掏槽眼到掌子面的距离</p>
+                    <p><strong>d</strong> = 孔底位置 = 孔底超出掌子面的距离</p>
+                    <p><strong>e</strong> = 相对底边 = a - d（掏槽眼的水平投影长度）</p>
+                    <p><strong>c</strong> = 开挖深度 = √(b² + e²)（实际钻孔长度）</p>
+                    <p><strong>∠B</strong> = 开挖角度 = ATAN(b/e)（相对于水平面的角度）</p>
+                    <p><strong>∠A'</strong> = <strong>台车输入角度</strong> = ATAN(e/b)（台车钻孔角度）</p>
+                    <p><strong>a'</strong> = 剩余底边 = 台车所需活动空间</p>
+                    <p><strong>共需空间</strong> = a' + a</p>
+                    <p><strong>剩余位置</strong> = L - 共需空间（>0表示空间足够）</p>
+                </div>
                 <div class="info-row">
                     <span>半幅活动宽度 (L)</span>
                     <span id="res_L">-</span>
@@ -489,8 +506,8 @@
                     </table>
                 </div>
                 <div class="formula-note" style="font-size:0.8rem;">
-                    <p><strong>📐 台车输入角度 ∠A' = ATAN(e/b)</strong></p>
-                    <p>简化：e=相对底边，b=开挖进尺，L=半幅宽度</p>
+                    <p><strong>📐 核心公式：台车输入角度 ∠A' = ATAN(e/b)</strong></p>
+                    <p>其中：e = 相对底边 = a - d，b = 开挖进尺</p>
                 </div>
             </div>
             <div class="creator">制作人：常彬</div>
@@ -538,45 +555,6 @@
             document.getElementById('adminLogin').style.display = type === 'admin' ? 'block' : 'none';
             document.getElementById('errorMsg').style.display = 'none';
             document.getElementById('adminErrorMsg').style.display = 'none';
-            
-            if (type === 'public') {
-                renderPasswordList();
-            }
-        }
-        
-        function renderPasswordList() {
-            const list = document.getElementById('pwdList');
-            const available = state.passwords.filter(p => p.used < p.uses);
-            const expired = state.passwords.filter(p => p.used >= p.uses);
-            
-            let html = '';
-            
-            if (available.length > 0) {
-                html += '<p style="color:#888;margin-bottom:10px;">可用密码：</p>';
-                available.forEach(p => {
-                    const remaining = p.uses - p.used;
-                    html += `<div class="pwd-item">
-                        <span>${p.pwd}</span>
-                        <span class="uses">剩余 ${remaining}/${p.uses} 次</span>
-                    </div>`;
-                });
-            }
-            
-            if (expired.length > 0) {
-                html += '<p style="color:#ff6b6b;margin:15px 0 10px 0;">已用完：</p>';
-                expired.forEach(p => {
-                    html += `<div class="pwd-item" style="opacity:0.5;">
-                        <span>${p.pwd}</span>
-                        <span style="color:#ff6b6b;">已用完</span>
-                    </div>`;
-                });
-            }
-            
-            if (state.passwords.length === 0) {
-                html = '<p style="color:#888;text-align:center;">暂无可用密码</p>';
-            }
-            
-            list.innerHTML = html;
         }
         
         function loginPublic() {
@@ -600,7 +578,7 @@
             pwdObj.used++;
             state.usedPassword = password;
             
-            showToast(`登录成功！密码 "${password}" 剩余 ${pwdObj.uses - pwdObj.used} 次`);
+            showToast(`登录成功！剩余 ${pwdObj.uses - pwdObj.used} 次`);
             showMain();
         }
         
@@ -621,7 +599,7 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('adminPanel').classList.remove('show');
             document.getElementById('mainContent').classList.add('show');
-            document.getElementById('userStatus').textContent = `📱 公用账户 | 密码 ${state.usedPassword} | 剩余 ${getRemainingUses(state.usedPassword)} 次`;
+            document.getElementById('userStatus').textContent = `📱 公用账户 | 剩余 ${getRemainingUses(state.usedPassword)} 次`;
             calculate();
         }
         
@@ -648,7 +626,6 @@
             document.getElementById('mainContent').classList.remove('show');
             document.getElementById('password').value = '';
             document.getElementById('adminPassword').value = '';
-            renderPasswordList();
         }
         
         function closeTrialModal() {
@@ -811,7 +788,6 @@
             });
             
             updateL();
-            renderPasswordList();
         }
         
         init();
