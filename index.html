@@ -1049,110 +1049,171 @@
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, W, H);
             
-            // 计算比例尺（让掏槽区域占画布的80%）
-            const maxA = a1 + 4 * stepA + 0.5; // 留点余量
-            const scale = (W * 0.4) / maxA;
-            const centerX = W / 2;
-            const bottomY = H * 0.85;
-            const archHeight = H * 0.7;
+            // 俯视图：从上往下看隧道（隧道推进方向朝下）
+            // X轴：隧道宽度方向（左→右）
+            // Y轴：推进方向（掌子面→孔底）
+            const halfWidth = tunnelWidth / 2;
+            const maxD = d1 + 4 * stepD + 0.3; // 最大孔底距离
             
-            // 颜色数组（不同级别掏槽用不同颜色）
+            // 计算比例尺
+            const scaleX = (W * 0.75) / tunnelWidth;  
+            const scaleY = (H * 0.75) / maxD;         
+            const scale = Math.min(scaleX, scaleY);
+            
+            const centerX = W / 2;
+            const faceY = H * 0.2;  // 掌子面Y位置（顶部）
+            const endY = faceY + maxD * scale;
+            
+            // 颜色数组（从内到外）
             const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#9b59b6'];
             
-            // 绘制隧道轮廓（半圆拱）
-            ctx.strokeStyle = '#888';
+            // 绘制隧道轮廓（矩形）
+            ctx.strokeStyle = '#555';
             ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(centerX, bottomY, archHeight, Math.PI, 0);
-            ctx.lineTo(centerX + archHeight, bottomY);
-            ctx.lineTo(centerX - archHeight, bottomY);
-            ctx.closePath();
-            ctx.stroke();
+            ctx.strokeRect(centerX - halfWidth * scale, faceY, tunnelWidth * scale, maxD * scale);
             
-            // 绘制中心线（虚线）
+            // 绘制中心线
             ctx.strokeStyle = '#666';
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
-            ctx.moveTo(centerX, bottomY);
-            ctx.lineTo(centerX, bottomY - archHeight - 20);
+            ctx.moveTo(centerX, faceY - 15);
+            ctx.lineTo(centerX, endY + 15);
             ctx.stroke();
             ctx.setLineDash([]);
             
-            // 绘制半幅宽度参考线
-            const halfWidth = tunnelWidth / 2;
-            const halfWidthX = centerX + halfWidth * scale;
-            ctx.strokeStyle = '#666';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([3, 3]);
+            // 绘制掌子面（顶部边界）
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(halfWidthX, bottomY - archHeight);
-            ctx.lineTo(halfWidthX, bottomY);
+            ctx.moveTo(centerX - halfWidth * scale, faceY);
+            ctx.lineTo(centerX + halfWidth * scale, faceY);
             ctx.stroke();
-            ctx.setLineDash([]);
             
-            // 绘制掏槽眼（从中心向外）
+            // 绘制左侧壁（左边线）
+            ctx.strokeStyle = '#00d4ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(centerX - halfWidth * scale, faceY);
+            ctx.lineTo(centerX - halfWidth * scale, endY);
+            ctx.stroke();
+            
+            // 绘制右侧壁（右边线）
+            ctx.beginPath();
+            ctx.moveTo(centerX + halfWidth * scale, faceY);
+            ctx.lineTo(centerX + halfWidth * scale, endY);
+            ctx.stroke();
+            
+            // 绘制掏槽眼（左右对称，向中心倾斜交汇）
             for (let i = 0; i < 5; i++) {
-                const a = a1 + i * stepA;  // 布眼距离
-                const d = d1 + i * stepD;  // 孔底距离
+                const a = a1 + i * stepA;  // 布眼距离（离中心线距离）
+                const d = d1 + i * stepD;  // 孔底距离（推进深度）
                 const color = colors[i % colors.length];
                 
-                // 布眼位置（孔口）
-                const x1 = centerX + a * scale;
-                // 孔底位置
-                const x2 = centerX + d * scale;
+                // 左侧掏槽眼：从左侧孔口向中心方向倾斜
+                const leftX = centerX - a * scale;  // 左侧孔口X
+                const leftEndX = centerX - 0.3 * scale;  // 左侧孔底X（向中心偏移）
+                const leftEndY = faceY + d * scale;  // 左侧孔底Y
                 
-                // 绘制孔口圆点
-                ctx.fillStyle = color;
-                ctx.beginPath();
-                ctx.arc(x1, bottomY, 6, 0, Math.PI * 2);
-                ctx.fill();
+                drawInclinedHole(ctx, leftX, faceY, leftEndX, leftEndY, color, i + 1, a, d, '左');
                 
-                // 绘制孔底圆点
-                ctx.fillStyle = color;
-                ctx.globalAlpha = 0.7;
-                ctx.beginPath();
-                ctx.arc(x2, bottomY, 5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.globalAlpha = 1;
+                // 右侧掏槽眼：从右侧孔口向中心方向倾斜
+                const rightX = centerX + a * scale;  // 右侧孔口X
+                const rightEndX = centerX + 0.3 * scale;  // 右侧孔底X（向中心偏移）
+                const rightEndY = faceY + d * scale;  // 右侧孔底Y
                 
-                // 绘制连接线（表示钻孔方向）
+                drawInclinedHole(ctx, rightX, faceY, rightEndX, rightEndY, color, i + 1, a, d, '右');
+                
+                // 绘制交汇区域（小圆圈表示两孔交汇处）
                 ctx.strokeStyle = color;
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 0.5;
                 ctx.beginPath();
-                ctx.moveTo(x1, bottomY);
-                ctx.lineTo(x2, bottomY);
+                ctx.arc(centerX, leftEndY, 3, 0, Math.PI * 2);
                 ctx.stroke();
-                
-                // 标注布眼距离 a
-                ctx.fillStyle = color;
-                ctx.font = 'bold 12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(`a${i+1}=${a.toFixed(1)}m`, x1, bottomY - 12);
-                
-                // 标注孔底距离 d
-                ctx.font = '11px Arial';
-                ctx.fillText(`d${i+1}=${d.toFixed(1)}m`, x2, bottomY + 20);
+                ctx.globalAlpha = 1;
             }
             
             // 绘制图例
             ctx.font = '10px Arial';
             ctx.textAlign = 'left';
             for (let i = 0; i < 5; i++) {
-                const y = 25 + i * 18;
+                const y = 25 + i * 16;
                 ctx.fillStyle = colors[i];
-                ctx.fillRect(10, y - 10, 12, 12);
-                ctx.fillStyle = '#fff';
-                ctx.fillText(`第${i+1}掏槽`, 28, y);
+                ctx.fillRect(10, y - 9, 10, 10);
+                ctx.fillStyle = '#ccc';
+                ctx.fillText(`第${i+1}掏槽`, 25, y);
             }
             
             // 绘制标注
-            ctx.fillStyle = '#aaa';
-            ctx.font = '12px Arial';
+            ctx.fillStyle = '#00d4ff';
+            ctx.font = 'bold 11px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(`半幅宽度 ${halfWidth.toFixed(1)}m`, centerX, bottomY + 45);
-            ctx.fillText('← 隧道中心 →', centerX, bottomY - archHeight - 10);
-            ctx.fillText('推进方向 →', W - 60, bottomY);
+            ctx.fillText('← 掌子面 →', centerX, faceY - 5);
+            
+            ctx.fillStyle = '#888';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('左壁', centerX - halfWidth * scale - 25, faceY + maxD * scale / 2);
+            ctx.textAlign = 'right';
+            ctx.fillText('右壁', centerX + halfWidth * scale + 25, faceY + maxD * scale / 2);
+            
+            ctx.fillStyle = '#aaa';
+            ctx.font = '11px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('↓ 推进方向 ↓', centerX, endY + 12);
+        }
+        
+        // 绘制倾斜的掏槽眼
+        function drawInclinedHole(ctx, x1, y1, x2, y2, color, level, a, d, side) {
+            // 孔口（掌子面上的位置）- 大圆点
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x1, y1, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 孔底位置 - 小圆点
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.6;
+            ctx.beginPath();
+            ctx.arc(x2, y2, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+            
+            // 钻孔轨迹线（带箭头表示方向）
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            
+            // 箭头（指向孔底）
+            const angle = Math.atan2(y2 - y1, x2 - x1);
+            const arrowSize = 6;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - arrowSize * Math.cos(angle - 0.4), y2 - arrowSize * Math.sin(angle - 0.4));
+            ctx.lineTo(x2 - arrowSize * Math.cos(angle + 0.4), y2 - arrowSize * Math.sin(angle + 0.4));
+            ctx.closePath();
+            ctx.fill();
+            
+            // 标注（右侧孔在右侧标注，左侧孔在左侧标注）
+            ctx.fillStyle = color;
+            ctx.font = 'bold 10px Arial';
+            if (side === '右') {
+                ctx.textAlign = 'left';
+                ctx.fillText(`a${level} ${a.toFixed(1)}m`, x1 + 10, y1 - 3);
+                ctx.font = '9px Arial';
+                ctx.fillText(`d${level} ${d.toFixed(1)}m`, x2 + 10, y2);
+            } else {
+                ctx.textAlign = 'right';
+                ctx.font = 'bold 10px Arial';
+                ctx.fillText(`${a.toFixed(1)}m a${level}`, x1 - 10, y1 - 3);
+                ctx.font = '9px Arial';
+                ctx.fillText(`${d.toFixed(1)}m d${level}`, x2 - 10, y2);
+            }
         }
         
         // ====== 初始化 ======
