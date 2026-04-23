@@ -15,7 +15,6 @@
         }
         .container { max-width: 1200px; margin: 0 auto; }
         
-        /* 登录界面 */
         .login-screen {
             max-width: 450px;
             margin: 80px auto;
@@ -25,36 +24,40 @@
         }
         .login-screen h2 { text-align: center; margin-bottom: 30px; color: #00d4ff; }
         .login-screen input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 2px solid rgba(0,212,255,0.3);
-            border-radius: 8px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            font-size: 16px;
+            width: 100%; padding: 15px; margin: 10px 0;
+            border: 2px solid rgba(0,212,255,0.3); border-radius: 8px;
+            background: rgba(255,255,255,0.1); color: #fff; font-size: 16px;
         }
-        .login-screen button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-        }
+        .login-screen button { width: 100%; padding: 15px; margin-top: 15px; border: none; border-radius: 8px; font-size: 18px; cursor: pointer; }
         .btn-public { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
         .btn-admin { background: #ff6b6b; color: #fff; }
         .login-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .login-tabs button { flex: 1; padding: 12px; background: rgba(255,255,255,0.1); color: #888; border: none; border-radius: 8px; }
         .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
         .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
-        .sync-status { text-align: center; padding: 10px; border-radius: 8px; margin-bottom: 15px; font-size: 0.85rem; }
+        
+        .sync-banner {
+            background: rgba(0,212,255,0.2);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .sync-banner h3 { color: #00d4ff; margin-bottom: 10px; }
+        .sync-banner p { color: #aaa; font-size: 0.9rem; margin-bottom: 15px; }
+        .sync-banner button { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin: 5px; }
+        .btn-sync { background: #00ff88; color: #1a1a2e; }
+        .btn-cloud { background: #ffc107; color: #1a1a2e; }
+        .btn-local { background: #9b59b6; color: #fff; }
+        .btn-reset { background: #ff6b6b; color: #fff; }
+        
+        .sync-status { margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 0.85rem; display: none; }
+        .sync-status.show { display: block; }
         .sync-status.loading { background: rgba(255,193,7,0.2); color: #ffc107; }
         .sync-status.success { background: rgba(0,255,136,0.2); color: #00ff88; }
         .sync-status.error { background: rgba(255,107,107,0.2); color: #ff6b6b; }
         
-        /* 试用限制弹窗 */
         .trial-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8);
@@ -66,7 +69,6 @@
         .trial-modal p { color: #888; line-height: 1.6; margin-bottom: 20px; }
         .trial-modal button { background: #00d4ff; color: #1a1a2e; border: none; padding: 15px 30px; border-radius: 10px; font-size: 16px; cursor: pointer; }
         
-        /* 管理面板 */
         .admin-panel { display: none; background: rgba(255,255,255,0.1); padding: 30px; border-radius: 20px; margin-bottom: 30px; }
         .admin-panel.show { display: block; }
         .admin-panel h2 { color: #ff6b6b; margin-bottom: 20px; }
@@ -79,10 +81,8 @@
         .admin-panel button { padding: 12px 25px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; margin: 5px 5px 5px 0; }
         .btn-save { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
         .btn-confirm { background: #00ff88; color: #1a1a2e; font-weight: bold; }
-        .btn-sync { background: #ffc107; color: #1a1a2e; }
         .btn-danger { background: #ff6b6b; color: #fff; }
         .btn-cancel { background: #666; color: #fff; }
-        .btn-refresh { background: #9b59b6; color: #fff; }
         
         .password-list-admin { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin: 15px 0; }
         .pwd-admin-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; margin: 10px 0; }
@@ -93,7 +93,6 @@
         .remaining { color: #00ff88; }
         .expired { color: #ff6b6b; }
         
-        /* 主界面 */
         .main-content { display: none; }
         .main-content.show { display: block; }
         .header { text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid rgba(0,212,255,0.3); }
@@ -127,12 +126,10 @@
         .param-hint { background: rgba(0,212,255,0.1); border-left: 3px solid #00d4ff; padding: 10px 15px; margin: 8px 0; border-radius: 0 8px 8px 0; font-size: 0.85rem; color: #aaa; }
         .param-hint strong { color: #00d4ff; }
         
-        /* Toast */
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,212,255,0.9); color: #1a1a2e; padding: 15px 30px; border-radius: 10px; display: none; z-index: 1000; }
         .toast.show { display: block; }
         .toast.error { background: rgba(255,107,107,0.9); color: #fff; }
         
-        /* 加载 */
         .loading { display: none; text-align: center; padding: 40px; }
         .loading.show { display: block; }
         .spinner { border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #00d4ff; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto; }
@@ -146,7 +143,22 @@
         <!-- 登录界面 -->
         <div class="login-screen" id="loginScreen">
             <h2>🔐 账户登录</h2>
-            <div id="syncStatus" class="sync-status"></div>
+            
+            <!-- 同步控制面板 -->
+            <div class="sync-banner">
+                <h3>☁️ 数据同步</h3>
+                <p>数据来源：<span id="dataSource">检测中...</span></p>
+                <div>
+                    <button class="btn-cloud" onclick="syncFromCloud()">📥 从云端下载</button>
+                    <button class="btn-local" onclick="useLocalData()">💾 使用本地数据</button>
+                </div>
+                <div style="margin-top:10px;">
+                    <button class="btn-reset" onclick="resetToDefaults()">🔄 恢复默认</button>
+                    <button class="btn-cancel" onclick="logout()" style="background:#666;color:#fff;">返回登录</button>
+                </div>
+                <div id="syncStatus" class="sync-status"></div>
+            </div>
+            
             <div class="login-tabs">
                 <button class="active" onclick="switchTab('public')">公用账户</button>
                 <button onclick="switchTab('admin')">管理账户</button>
@@ -155,7 +167,7 @@
             <div id="publicLogin">
                 <p style="color:#888;text-align:center;margin-bottom:15px;">输入公用密码登录</p>
                 <input type="password" id="password" placeholder="请输入密码">
-                <div class="error-msg" id="errorMsg">密码错误或已用完</div>
+                <div class="error-msg" id="errorMsg">密码错误</div>
                 <button class="btn-public" onclick="loginPublic()">登录</button>
             </div>
             
@@ -180,9 +192,10 @@
         <div class="admin-panel" id="adminPanel">
             <h2>⚙️ 密码管理</h2>
             
-            <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-                <button class="btn-refresh" onclick="forceReload()" style="flex:1;">🔄 重置本地数据</button>
-                <button class="btn-cancel" onclick="logout()" style="flex:1;">返回登录</button>
+            <div class="sync-banner">
+                <h3>☁️ 同步操作</h3>
+                <p>修改密码后，需要运行Python脚本同步到云端</p>
+                <button class="btn-sync" onclick="exportData()">📤 导出数据</button>
             </div>
             
             <h3>➕ 添加新密码</h3>
@@ -219,9 +232,8 @@
                 <button class="btn-save" onclick="updateAdminPassword()">💾 保存管理密码</button>
             </div>
             
-            <div class="formula-note" style="margin-top:20px;">
-                <p><strong>⚠️ 重要提示：</strong></p>
-                <p>数据保存在本地浏览器。请联系常彬进行云端同步。</p>
+            <div style="margin-top:20px;">
+                <button class="btn-cancel" onclick="logout()" style="width:100%;">返回登录</button>
             </div>
         </div>
         
@@ -343,7 +355,10 @@
     <div class="toast" id="toast"></div>
     
     <script>
-        // ====== 默认数据 ======
+        // ====== 配置 ======
+        const CLOUD_DATA_URL = 'https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/app_data.json';
+        const STORAGE_KEY = 'tunnel_app_data_v3';
+        
         const DEFAULT_DATA = {
             passwords: [
                 { pwd: 'Cb17612833821.', uses: 10, used: 0 },
@@ -360,7 +375,8 @@
             usedPassword: '',
             passwords: [],
             adminPassword: 'admin2026',
-            deviceId: localStorage.getItem('tunnel_device_id') || ''
+            deviceId: localStorage.getItem('tunnel_device_id') || '',
+            dataMode: 'local' // 'cloud' or 'local'
         };
         
         // ====== 工具函数 ======
@@ -373,15 +389,11 @@
         
         function showSyncStatus(msg, type) {
             const el = document.getElementById('syncStatus');
-            if (el) {
-                el.textContent = msg;
-                el.className = 'sync-status ' + type;
-            }
+            el.textContent = msg;
+            el.className = 'sync-status show ' + type;
         }
         
         // ====== 数据持久化 ======
-        const STORAGE_KEY = 'tunnel_app_data_v2';
-        
         function saveToLocal() {
             const data = {
                 passwords: state.passwords,
@@ -389,42 +401,47 @@
                 lastUpdate: Date.now()
             };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            console.log('Data saved:', data);
         }
         
         function loadFromLocal() {
             const saved = localStorage.getItem(STORAGE_KEY);
-            console.log('Loading from localStorage...');
             if (saved) {
                 try {
-                    const data = JSON.parse(saved);
-                    console.log('Loaded data:', data);
-                    return data;
-                } catch (e) {
-                    console.error('Parse error:', e);
-                }
+                    return JSON.parse(saved);
+                } catch (e) {}
             }
-            console.log('No local data found');
             return null;
         }
         
-        function forceReload() {
-            // 重置为默认数据
-            state.passwords = JSON.parse(JSON.stringify(DEFAULT_DATA.passwords));
-            state.adminPassword = DEFAULT_DATA.adminPassword;
-            saveToLocal();
-            renderAdminPasswordList();
-            showToast('已重置为默认数据');
+        // ====== 云端同步 ======
+        async function syncFromCloud() {
+            showSyncStatus('正在从云端下载...', 'loading');
+            try {
+                const resp = await fetch(CLOUD_DATA_URL + '?t=' + Date.now());
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.passwords && data.passwords.length > 0) {
+                        state.passwords = data.passwords;
+                        state.adminPassword = data.adminPassword || DEFAULT_DATA.adminPassword;
+                        state.dataMode = 'cloud';
+                        saveToLocal();
+                        document.getElementById('dataSource').textContent = '☁️ 云端数据';
+                        showSyncStatus('云端数据下载成功！', 'success');
+                        showToast('云端数据已同步');
+                    } else {
+                        showSyncStatus('云端数据格式错误', 'error');
+                    }
+                } else {
+                    showSyncStatus('云端下载失败，使用本地数据', 'error');
+                    useLocalData();
+                }
+            } catch (e) {
+                showSyncStatus('网络错误，使用本地数据', 'error');
+                useLocalData();
+            }
         }
         
-        // ====== 初始化 ======
-        function init() {
-            if (!state.deviceId) {
-                state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('tunnel_device_id', state.deviceId);
-            }
-            
-            // 加载本地数据
+        function useLocalData() {
             const localData = loadFromLocal();
             if (localData) {
                 state.passwords = localData.passwords || DEFAULT_DATA.passwords;
@@ -434,11 +451,61 @@
                 state.adminPassword = DEFAULT_DATA.adminPassword;
                 saveToLocal();
             }
+            state.dataMode = 'local';
+            document.getElementById('dataSource').textContent = '💾 本地数据';
+            showSyncStatus('已切换到本地数据', 'success');
+            showToast('使用本地数据');
+        }
+        
+        function resetToDefaults() {
+            if (confirm('确定要恢复默认数据吗？')) {
+                state.passwords = JSON.parse(JSON.stringify(DEFAULT_DATA.passwords));
+                state.adminPassword = DEFAULT_DATA.adminPassword;
+                saveToLocal();
+                showSyncStatus('已恢复默认数据', 'success');
+                showToast('已恢复默认数据');
+            }
+        }
+        
+        function exportData() {
+            const data = {
+                passwords: state.passwords,
+                adminPassword: state.adminPassword
+            };
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tunnel_app_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('请运行 sync_data.py 同步到云端');
+        }
+        
+        // ====== 初始化 ======
+        function init() {
+            if (!state.deviceId) {
+                state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('tunnel_device_id', state.deviceId);
+            }
             
-            console.log('App initialized with passwords:', state.passwords);
-            console.log('Admin password:', state.adminPassword);
+            // 尝试从本地加载
+            const localData = loadFromLocal();
+            if (localData) {
+                state.passwords = localData.passwords || DEFAULT_DATA.passwords;
+                state.adminPassword = localData.adminPassword || DEFAULT_DATA.adminPassword;
+                document.getElementById('dataSource').textContent = '💾 本地数据';
+            } else {
+                state.passwords = JSON.parse(JSON.stringify(DEFAULT_DATA.passwords));
+                state.adminPassword = DEFAULT_DATA.adminPassword;
+                saveToLocal();
+                document.getElementById('dataSource').textContent = '💾 默认数据';
+            }
             
-            // 事件监听
+            // 自动尝试从云端同步
+            syncFromCloud();
+            
             document.getElementById('width').addEventListener('input', updateL);
             document.getElementById('stepA').addEventListener('input', function() {
                 document.getElementById('stepA_val').textContent = this.value;
@@ -466,13 +533,10 @@
         
         function loginPublic() {
             const password = document.getElementById('password').value;
-            console.log('Login attempt with:', password);
-            console.log('Available passwords:', state.passwords);
-            
             const pwdObj = state.passwords.find(p => p.pwd === password);
             
             if (!pwdObj) {
-                document.getElementById('errorMsg').textContent = '密码错误，当前可用密码：' + state.passwords.map(p => p.pwd).join(', ');
+                document.getElementById('errorMsg').textContent = '密码错误';
                 document.getElementById('errorMsg').style.display = 'block';
                 return;
             }
@@ -492,8 +556,6 @@
         
         function loginAdmin() {
             const password = document.getElementById('adminPassword').value;
-            console.log('Admin login attempt:', password);
-            console.log('Expected:', state.adminPassword);
             
             if (password !== state.adminPassword) {
                 document.getElementById('adminErrorMsg').style.display = 'block';
@@ -536,6 +598,7 @@
             document.getElementById('mainContent').classList.remove('show');
             document.getElementById('password').value = '';
             document.getElementById('adminPassword').value = '';
+            showSyncStatus('', '');
         }
         
         function closeTrialModal() {
@@ -559,9 +622,6 @@
             
             state.passwords.push({ pwd, uses, used: 0 });
             saveToLocal();
-            
-            console.log('Password added:', pwd);
-            console.log('All passwords now:', state.passwords);
             
             showToast(`密码 "${pwd}" 添加成功，可用 ${uses} 次`);
             
@@ -629,8 +689,6 @@
             
             state.adminPassword = newPwd;
             saveToLocal();
-            
-            console.log('Admin password changed to:', newPwd);
             
             showToast('管理密码已更新为：' + newPwd);
             document.getElementById('newAdminPwd').value = '';
