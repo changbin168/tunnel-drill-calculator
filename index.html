@@ -447,6 +447,29 @@
                 text-align: center;
                 margin-top: 20px;
             }
+            
+            /* 掏槽俯视图 */
+            .diagram-section {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                margin-bottom: 20px;
+            }
+            .diagram-container {
+                background: rgba(0,0,0,0.3);
+                border-radius: 10px;
+                padding: 15px;
+                text-align: center;
+            }
+            .diagram-container h4 {
+                margin: 0 0 10px 0;
+                color: #00d4ff;
+                font-size: 0.95rem;
+            }
+            .diagram-container canvas {
+                max-width: 100%;
+                border-radius: 5px;
+            }
         }
     </style>
 </head>
@@ -623,6 +646,12 @@
             
             <div class="card" id="resultCard">
                 <h2>📊 计算结果</h2>
+                <div class="diagram-section">
+                    <div class="diagram-container">
+                        <h4>掏槽俯视图</h4>
+                        <canvas id="topViewCanvas" width="500" height="400"></canvas>
+                    </div>
+                </div>
                 <div class="info-row">
                     <span>半幅活动宽度 (L)</span>
                     <span id="res_L">-</span>
@@ -1004,6 +1033,126 @@
                     <td class="${parseFloat(row.remain) < 0 ? 'negative' : ''}">${row.remain}</td>
                 </tr>
             `).join('');
+            
+            // 绘制掏槽俯视图
+            drawTopView(a1, d1, stepA, stepD, width);
+        }
+        
+        // ====== 掏槽俯视图绘制 ======
+        function drawTopView(a1, d1, stepA, stepD, tunnelWidth) {
+            const canvas = document.getElementById('topViewCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = canvas.width;
+            const H = canvas.height;
+            
+            // 清空画布
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, W, H);
+            
+            // 计算比例尺（让掏槽区域占画布的80%）
+            const maxA = a1 + 4 * stepA + 0.5; // 留点余量
+            const scale = (W * 0.4) / maxA;
+            const centerX = W / 2;
+            const bottomY = H * 0.85;
+            const archHeight = H * 0.7;
+            
+            // 颜色数组（不同级别掏槽用不同颜色）
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#9b59b6'];
+            
+            // 绘制隧道轮廓（半圆拱）
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, bottomY, archHeight, Math.PI, 0);
+            ctx.lineTo(centerX + archHeight, bottomY);
+            ctx.lineTo(centerX - archHeight, bottomY);
+            ctx.closePath();
+            ctx.stroke();
+            
+            // 绘制中心线（虚线）
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, bottomY);
+            ctx.lineTo(centerX, bottomY - archHeight - 20);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制半幅宽度参考线
+            const halfWidth = tunnelWidth / 2;
+            const halfWidthX = centerX + halfWidth * scale;
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(halfWidthX, bottomY - archHeight);
+            ctx.lineTo(halfWidthX, bottomY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // 绘制掏槽眼（从中心向外）
+            for (let i = 0; i < 5; i++) {
+                const a = a1 + i * stepA;  // 布眼距离
+                const d = d1 + i * stepD;  // 孔底距离
+                const color = colors[i % colors.length];
+                
+                // 布眼位置（孔口）
+                const x1 = centerX + a * scale;
+                // 孔底位置
+                const x2 = centerX + d * scale;
+                
+                // 绘制孔口圆点
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x1, bottomY, 6, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 绘制孔底圆点
+                ctx.fillStyle = color;
+                ctx.globalAlpha = 0.7;
+                ctx.beginPath();
+                ctx.arc(x2, bottomY, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+                
+                // 绘制连接线（表示钻孔方向）
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(x1, bottomY);
+                ctx.lineTo(x2, bottomY);
+                ctx.stroke();
+                
+                // 标注布眼距离 a
+                ctx.fillStyle = color;
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(`a${i+1}=${a.toFixed(1)}m`, x1, bottomY - 12);
+                
+                // 标注孔底距离 d
+                ctx.font = '11px Arial';
+                ctx.fillText(`d${i+1}=${d.toFixed(1)}m`, x2, bottomY + 20);
+            }
+            
+            // 绘制图例
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'left';
+            for (let i = 0; i < 5; i++) {
+                const y = 25 + i * 18;
+                ctx.fillStyle = colors[i];
+                ctx.fillRect(10, y - 10, 12, 12);
+                ctx.fillStyle = '#fff';
+                ctx.fillText(`第${i+1}掏槽`, 28, y);
+            }
+            
+            // 绘制标注
+            ctx.fillStyle = '#aaa';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`半幅宽度 ${halfWidth.toFixed(1)}m`, centerX, bottomY + 45);
+            ctx.fillText('← 隧道中心 →', centerX, bottomY - archHeight - 10);
+            ctx.fillText('推进方向 →', W - 60, bottomY);
         }
         
         // ====== 初始化 ======
