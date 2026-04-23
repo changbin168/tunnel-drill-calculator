@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>隧道进尺角度计算 v3</title>
+    <title>三臂凿岩台车开挖角度计算</title>
     <style>
         * {
             margin: 0;
@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             padding: 20px;
@@ -21,89 +21,15 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0,212,255,0.5);
-        }
-        h1 span {
-            font-size: 14px;
-            color: #888;
-            display: block;
-            margin-top: 5px;
-        }
         
-        /* 设置向导 */
-        .setup-screen {
-            max-width: 500px;
+        /* 登录界面 */
+        .login-screen {
+            max-width: 400px;
             margin: 80px auto;
             background: rgba(255,255,255,0.1);
             padding: 40px;
             border-radius: 20px;
             backdrop-filter: blur(10px);
-        }
-        .setup-screen h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #00d4ff;
-        }
-        .setup-screen p {
-            color: #888;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-        .setup-screen code {
-            background: rgba(0,0,0,0.3);
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            word-break: break-all;
-        }
-        .setup-screen input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-        }
-        .setup-screen button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            background: #00d4ff;
-            color: #1a1a2e;
-        }
-        .setup-screen button:hover {
-            transform: scale(1.02);
-            box-shadow: 0 5px 20px rgba(0,212,255,0.3);
-        }
-        .skip-btn {
-            background: rgba(255,255,255,0.1) !important;
-            color: #888 !important;
-            font-size: 14px !important;
-        }
-        
-        /* 登录界面 */
-        .login-screen {
-            display: none;
-            max-width: 400px;
-            margin: 100px auto;
-            background: rgba(255,255,255,0.1);
-            padding: 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-        }
-        .login-screen.show {
-            display: block;
         }
         .login-screen h2 {
             text-align: center;
@@ -114,24 +40,24 @@
             width: 100%;
             padding: 15px;
             margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
             background: rgba(255,255,255,0.1);
             color: #fff;
+            font-size: 16px;
         }
         .login-screen button {
             width: 100%;
             padding: 15px;
             margin-top: 20px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 18px;
             cursor: pointer;
         }
         .btn-public {
-            background: #00d4ff;
-            color: #1a1a2e;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
         }
         .btn-admin {
             background: #ff6b6b;
@@ -144,10 +70,12 @@
         }
         .login-tabs button {
             flex: 1;
-            padding: 10px;
-            font-size: 14px;
+            padding: 12px;
             background: rgba(255,255,255,0.1);
             color: #888;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
         }
         .login-tabs button.active {
             background: #00d4ff;
@@ -221,24 +149,24 @@
             width: 100%;
             padding: 15px;
             margin: 10px 0;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
             background: rgba(255,255,255,0.1);
             color: #fff;
+            font-size: 16px;
         }
         .admin-panel button {
             padding: 15px 30px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
             margin-right: 10px;
             margin-top: 10px;
         }
         .btn-save {
-            background: #00d4ff;
-            color: #1a1a2e;
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
         }
         .btn-cancel {
             background: #666;
@@ -252,9 +180,6 @@
             padding: 15px;
             border-radius: 10px;
             margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
         
         /* 主界面 */
@@ -264,130 +189,32 @@
         .main-content.show {
             display: block;
         }
-        .logout-bar {
-            text-align: right;
-            margin-bottom: 20px;
+        
+        .header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0,212,255,0.3);
         }
-        .logout-bar button {
-            background: rgba(255,255,255,0.1);
+        .header-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header h1 {
+            color: #00d4ff;
+            font-size: 1.4rem;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0,212,255,0.5);
+        }
+        .header h2 {
             color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            cursor: pointer;
+            font-size: 1.2rem;
+            margin: 5px 0 0 0;
+            font-weight: normal;
         }
-        
-        /* 参数表格 */
-        .params-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-        .params-table th, .params-table td {
-            padding: 12px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .params-table th {
-            background: rgba(0,212,255,0.2);
-            color: #00d4ff;
-        }
-        .params-table input {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 5px;
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            text-align: center;
-        }
-        .params-table input:focus {
-            outline: none;
-            border-color: #00d4ff;
-        }
-        .params-table input.negative {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-        
-        /* 结果表格 */
-        .result-section {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            overflow-x: auto;
-        }
-        .result-section h3 {
-            color: #00d4ff;
-            margin-bottom: 15px;
-        }
-        .result-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 800px;
-        }
-        .result-table th, .result-table td {
-            padding: 10px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .result-table th {
-            background: rgba(0,212,255,0.2);
-            color: #00d4ff;
-        }
-        .result-table td {
-            background: rgba(255,255,255,0.05);
-        }
-        .result-table td.warning {
-            color: #ff6b6b;
-            font-weight: bold;
-        }
-        
-        /* 按钮 */
-        .btn-calculate {
-            width: 100%;
-            padding: 20px;
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #1a1a2e;
-            border: none;
-            border-radius: 15px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-calculate:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(0,212,255,0.3);
-        }
-        
-        /* 图示 */
-        .diagram {
-            background: rgba(255,255,255,0.05);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 30px;
-            text-align: center;
-        }
-        .diagram svg {
-            max-width: 100%;
-        }
-        
-        /* 提示 */
-        .tip {
-            background: rgba(255,107,107,0.2);
-            border-left: 4px solid #ff6b6b;
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 0 10px 10px 0;
-        }
-        
-        /* 用户信息 */
-        .user-info {
+        .user-bar {
             background: rgba(0,212,255,0.1);
             padding: 15px;
             border-radius: 10px;
@@ -396,8 +223,167 @@
             justify-content: space-between;
             align-items: center;
         }
+        .user-bar button {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .creator {
+            text-align: right;
+            color: #ff6666;
+            font-size: 0.75rem;
+            margin-top: 30px;
+            padding-bottom: 10px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #00d4ff;
+            padding-bottom: 10px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .input-group label {
+            margin-bottom: 8px;
+            color: #ccc;
+            font-size: 0.95rem;
+        }
+        .input-group input {
+            padding: 12px 15px;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: #00d4ff;
+            background: rgba(0,212,255,0.1);
+        }
+        .input-group .unit {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        th {
+            background: rgba(0,212,255,0.3);
+            color: #fff;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        td {
+            background: rgba(255,255,255,0.05);
+            font-size: 0.9rem;
+        }
+        .result-highlight {
+            color: #00ff88;
+            font-weight: bold;
+        }
+        .negative {
+            color: #ff4444 !important;
+            font-weight: bold;
+        }
+        .formula-note {
+            background: rgba(255,193,7,0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .formula-note p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: #ffc107;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0,212,255,0.1);
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        .info-row span:first-child {
+            color: #888;
+        }
+        .info-row span:last-child {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 15px;
+        }
+        .table-wrapper table {
+            min-width: 800px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.4rem;
+            }
+            .card {
+                padding: 15px;
+            }
+            table {
+                font-size: 0.8rem;
+            }
+            th, td {
+                padding: 8px 4px;
+            }
+        }
         
-        /* Toast通知 */
+        /* Toast */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -418,7 +404,7 @@
             color: #fff;
         }
         
-        /* 加载动画 */
+        /* 加载 */
         .loading {
             display: none;
             text-align: center;
@@ -444,29 +430,10 @@
 </head>
 <body>
     <div class="container">
-        <h1>🚇 隧道进尺角度计算
-            <span>v3.0 | 四川交建智能装备分公司</span>
-        </h1>
-        
         <!-- 加载中 -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p style="margin-top: 20px;">加载中...</p>
-        </div>
-        
-        <!-- 设置向导 -->
-        <div class="setup-screen" id="setupScreen">
-            <h2>🔐 首次设置</h2>
-            <p>为了保护账户安全，本系统需要配置GitHub Token。</p>
-            <p><strong>步骤：</strong></p>
-            <p>1. 打开 GitHub: <a href="https://github.com/settings/tokens" target="_blank" style="color:#00d4ff">点击这里</a></p>
-            <p>2. 点击 "Generate new token (classic)"</p>
-            <p>3. Token名称随便填，勾选 <code>repo</code> 权限</p>
-            <p>4. 点击 "Generate token"，复制生成的Token</p>
-            <p>5. 粘贴到下方：</p>
-            <input type="password" id="tokenInput" placeholder="粘贴GitHub Token">
-            <button onclick="saveToken()">保存并继续</button>
-            <button class="skip-btn" onclick="skipSetup()">跳过设置（使用基础模式）</button>
         </div>
         
         <!-- 登录界面 -->
@@ -511,110 +478,117 @@
         
         <!-- 主界面 -->
         <div class="main-content" id="mainContent">
-            <div class="user-info">
-                <span id="userStatus">公用账户</span>
+            <div class="header">
+                <div class="header-content">
+                    <h1>四川交建智能装备分公司</h1>
+                    <h2>三臂凿岩台车开挖角度计算器</h2>
+                </div>
+            </div>
+            
+            <div class="user-bar">
+                <span id="userStatus">📱 公用账户 | 剩余试用: 3次</span>
                 <button onclick="logout()">退出登录</button>
             </div>
             
-            <div class="tip">
-                <strong>💡 使用说明：</strong>输入掏槽眼参数，点击计算查看各炮眼的角度和位置。负数表示超出隧道中心线。
+            <!-- 基本参数 -->
+            <div class="card">
+                <h2>📐 基本参数</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>开挖进尺 (b)</label>
+                        <input type="number" id="b" value="4" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>推进梁长度 (c')</label>
+                        <input type="number" id="c" value="7.2" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>隧道宽度</label>
+                        <input type="number" id="width" value="16.35" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>布眼间距增加值</label>
+                        <input type="number" id="stepA" value="0.7" step="0.01" onchange="calculate()">
+                        <span class="unit">每级增加布眼距离（米）</span>
+                    </div>
+                    <div class="input-group">
+                        <label>孔底位置增加值</label>
+                        <input type="number" id="stepD" value="1.2" step="0.01" onchange="calculate()">
+                        <span class="unit">每级增加孔底位置（米）</span>
+                    </div>
+                </div>
+                
+                <div class="formula-note">
+                    <p>📌 半幅活动宽度 L = 隧道宽度 ÷ 2 = <span id="L_auto">8.175</span> 米</p>
+                </div>
+                
+                <button class="btn" onclick="calculate()">🧮 计算</button>
             </div>
             
-            <!-- 掏槽眼参数 -->
-            <h3 style="color: #00d4ff; margin: 20px 0;">📐 掏槽眼参数</h3>
-            <table class="params-table">
-                <thead>
-                    <tr>
-                        <th>参数</th>
-                        <th>垂直孔</th>
-                        <th>倾斜孔</th>
-                        <th>说明</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>孔深 L (m)</td>
-                        <td><input type="number" id="L_v" value="3.2" step="0.1" onchange="calculate()"></td>
-                        <td><input type="number" id="L_s" value="3.5" step="0.1" onchange="calculate()"></td>
-                        <td>倾斜孔需更深以保持眼底齐平</td>
-                    </tr>
-                    <tr>
-                        <td>角度 θ (°)</td>
-                        <td><input type="number" id="theta_v" value="90" step="1" onchange="calculate()"></td>
-                        <td><input type="number" id="theta_s" value="75" step="1" onchange="calculate()"></td>
-                        <td>与掌子面夹角，90°为垂直</td>
-                    </tr>
-                    <tr>
-                        <td>偏角 φ (°)</td>
-                        <td><input type="number" id="phi_v" value="0" step="1" onchange="calculate()"></td>
-                        <td><input type="number" id="phi_s" value="0" step="1" onchange="calculate()"></td>
-                        <td>水平面偏转角度</td>
-                    </tr>
-                    <tr>
-                        <td>间距 a (m)</td>
-                        <td colspan="2"><input type="number" id="a" value="0.3" step="0.05" onchange="calculate()"></td>
-                        <td>相邻掏槽眼间距</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <!-- 基础参数 -->
-            <h3 style="color: #00d4ff; margin: 20px 0;">⚙️ 基础参数</h3>
-            <table class="params-table">
-                <thead>
-                    <tr>
-                        <th>参数</th>
-                        <th>数值</th>
-                        <th>说明</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>循环进尺 (m)</td>
-                        <td><input type="number" id="advance" value="2.8" step="0.1" onchange="calculate()"></td>
-                        <td>每循环开挖深度</td>
-                    </tr>
-                    <tr>
-                        <td>超挖 (m)</td>
-                        <td><input type="number" id="overbreak" value="0.15" step="0.05" onchange="calculate()"></td>
-                        <td>预留的超挖量</td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <button class="btn-calculate" onclick="calculate()">🧮 计算掏槽参数</button>
+            <!-- 各掏槽参数 -->
+            <div class="card">
+                <h2>📍 各掏槽布眼距离与孔底位置</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>第一掏槽 - 布眼距离 (a₁)</label>
+                        <input type="number" id="a1" value="3.3" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>第一掏槽 - 孔底位置 (d₁)</label>
+                        <input type="number" id="d1" value="0.25" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                </div>
+                <div class="formula-note">
+                    <p>📌 第二掏槽：布眼距离 = a₁ + <span id="stepA_val">0.7</span>，孔底位置 = d₁ + <span id="stepD_val">1.2</span></p>
+                    <p>📌 第三掏槽 = 第二掏槽 + 步长，以此类推...</p>
+                </div>
+            </div>
             
             <!-- 计算结果 -->
-            <div class="result-section">
-                <h3>📊 掏槽眼坐标计算结果</h3>
-                <table class="result-table" id="resultTable">
+            <div class="card" id="resultCard">
+                <h2>📊 计算结果</h2>
+                
+                <div class="info-row">
+                    <span>半幅活动宽度 (L)</span>
+                    <span id="res_L">-</span>
+                </div>
+                
+                <div class="table-wrapper">
+                <table>
                     <thead>
                         <tr>
-                            <th>炮眼</th>
-                            <th>X (m)</th>
-                            <th>Y (m)</th>
-                            <th>Z (m)</th>
-                            <th>角度 (°)</th>
-                            <th>孔深 (m)</th>
+                            <th>名称</th>
+                            <th>布眼距离<br>(a)</th>
+                            <th>孔底位置<br>(d)</th>
+                            <th>相对底边<br>(e=a-d)</th>
+                            <th>开挖深度<br>(c)</th>
+                            <th>开挖角度<br>(∠B)</th>
+                            <th class="result-highlight">台车输入<br>(∠A')</th>
+                            <th>剩余底边<br>(a')</th>
+                            <th>共需空间<br>距离</th>
+                            <th>剩余位置<br>距离</th>
                         </tr>
                     </thead>
-                    <tbody id="resultBody">
+                    <tbody id="resultTable">
                     </tbody>
                 </table>
+                </div>
+                
+                <div class="formula-note" style="font-size:0.8rem;">
+                    <p><strong>📐 台车输入角度 ∠A' = ATAN(e/b)</strong></p>
+                    <p>简化：e=相对底边，b=开挖进尺，L=半幅宽度</p>
+                </div>
             </div>
-            
-            <!-- 图示 -->
-            <div class="diagram">
-                <h3 style="color: #00d4ff; margin-bottom: 15px;">📐 掏槽布置示意图</h3>
-                <svg width="600" height="400" id="diagramSvg"></svg>
-                <p style="color: #888; margin-top: 10px; font-size: 14px;">
-                    红色虚线为隧道开挖线，蓝色为掏槽眼，数字为相对坐标
-                </p>
-            </div>
+            <div class="creator">制作人：常彬</div>
         </div>
     </div>
     
-    <!-- Toast通知 -->
+    <!-- Toast -->
     <div class="toast" id="toast"></div>
     
     <script>
@@ -632,12 +606,10 @@
             isAdmin: false,
             deviceId: localStorage.getItem('tunnel_device_id') || '',
             users: [],
-            publicPassword: '',
-            adminPassword: '',
+            publicPassword: 'Cb17612833821.',
+            adminPassword: 'admin2026',
             trialCount: parseInt(localStorage.getItem('tunnel_trial_count') || '0'),
-            MAX_TRIALS: 3,
-            token: localStorage.getItem('tunnel_token') || '',
-            setupDone: localStorage.getItem('tunnel_setup_done') === 'true'
+            MAX_TRIALS: 3
         };
         
         // ====== 工具函数 ======
@@ -652,74 +624,7 @@
             document.getElementById('loading').className = show ? 'loading show' : 'loading';
         }
         
-        // ====== 设置向导 ======
-        function saveToken() {
-            const token = document.getElementById('tokenInput').value.trim();
-            if (!token || !token.startsWith('ghp_')) {
-                showToast('请输入有效的GitHub Token', true);
-                return;
-            }
-            state.token = token;
-            localStorage.setItem('tunnel_token', token);
-            localStorage.setItem('tunnel_setup_done', 'true');
-            state.setupDone = true;
-            showToast('Token保存成功！');
-            document.getElementById('setupScreen').style.display = 'none';
-            showLogin();
-        }
-        
-        function skipSetup() {
-            localStorage.setItem('tunnel_setup_done', 'true');
-            state.setupDone = true;
-            document.getElementById('setupScreen').style.display = 'none';
-            showLogin();
-        }
-        
-        // ====== GitHub API ======
-        async function fetchUserData() {
-            if (!state.token) return null;
-            try {
-                const resp = await fetch(`https://raw.githubusercontent.com/${CONFIG.repo}/${CONFIG.branch}/${CONFIG.dataPath}`);
-                if (!resp.ok) throw new Error('获取数据失败');
-                return await resp.json();
-            } catch (e) {
-                console.error('Fetch error:', e);
-                return null;
-            }
-        }
-        
-        async function saveUserData(data) {
-            if (!state.token) return false;
-            try {
-                // 获取SHA
-                const shaResp = await fetch(`https://api.github.com/repos/${CONFIG.repo}/contents/${CONFIG.dataPath}`, {
-                    headers: { 'Authorization': `token ${state.token}` }
-                });
-                const shaData = await shaResp.json();
-                const sha = shaData.sha;
-                
-                // 更新
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-                const resp = await fetch(`https://api.github.com/repos/${CONFIG.repo}/contents/${CONFIG.dataPath}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${state.token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ message: 'Update user data', content, sha })
-                });
-                return resp.ok;
-            } catch (e) {
-                console.error('Save error:', e);
-                return false;
-            }
-        }
-        
         // ====== 登录相关 ======
-        function showLogin() {
-            document.getElementById('loginScreen').classList.add('show');
-        }
-        
         function switchTab(type) {
             state.loginType = type;
             document.querySelectorAll('.login-tabs button').forEach(btn => {
@@ -734,26 +639,13 @@
             document.getElementById('errorMsg').style.display = 'none';
         }
         
-        async function login() {
+        function login() {
             const password = document.getElementById('password').value;
             document.getElementById('errorMsg').style.display = 'none';
             
             showLoading(true);
             
-            // 获取最新数据
-            const data = await fetchUserData();
-            if (!data) {
-                // 无token模式，使用默认密码
-                state.publicPassword = 'Cb17612833821.';
-                state.adminPassword = 'admin2026';
-                state.users = [];
-            } else {
-                state.publicPassword = data.publicPassword || '';
-                state.adminPassword = data.adminPassword || '';
-                state.users = data.users || [];
-            }
-            
-            // 检查试用限制（公用账户）
+            // 公用账户
             if (state.loginType === 'public') {
                 if (password !== state.publicPassword) {
                     showLoading(false);
@@ -772,33 +664,11 @@
                 state.trialCount++;
                 localStorage.setItem('tunnel_trial_count', state.trialCount.toString());
                 
-                // 记录用户
-                let deviceId = state.deviceId;
-                if (!deviceId) {
-                    deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                    localStorage.setItem('tunnel_device_id', deviceId);
-                    state.deviceId = deviceId;
-                }
-                
-                let user = state.users.find(u => u.deviceId === deviceId);
-                if (!user) {
-                    user = { deviceId, trials: 0, lastLogin: '' };
-                    state.users.push(user);
-                }
-                user.trials++;
-                user.lastLogin = new Date().toISOString();
-                
-                await saveUserData({
-                    users: state.users,
-                    publicPassword: state.publicPassword,
-                    adminPassword: state.adminPassword,
-                    version: '1.0'
-                });
-                
                 showLoading(false);
                 showMain();
                 
             } else {
+                // 管理账户
                 if (password !== state.adminPassword) {
                     showLoading(false);
                     document.getElementById('errorMsg').textContent = '管理员密码错误';
@@ -814,7 +684,7 @@
         function showMain() {
             state.isLoggedIn = true;
             state.isAdmin = false;
-            document.getElementById('loginScreen').classList.remove('show');
+            document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('adminPanel').classList.remove('show');
             document.getElementById('mainContent').classList.add('show');
             document.getElementById('userStatus').textContent = `📱 公用账户 | 剩余试用: ${state.MAX_TRIALS - state.trialCount}次`;
@@ -824,23 +694,21 @@
         function showAdmin() {
             state.isLoggedIn = true;
             state.isAdmin = true;
-            document.getElementById('loginScreen').classList.remove('show');
+            document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('show');
             document.getElementById('adminPanel').classList.add('show');
-            renderUserList();
         }
         
         function logout() {
             state.isLoggedIn = false;
             state.isAdmin = false;
-            document.getElementById('loginScreen').classList.remove('show');
+            document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('adminPanel').classList.remove('show');
             document.getElementById('mainContent').classList.remove('show');
-            document.getElementById('loginScreen').classList.add('show');
             document.getElementById('password').value = '';
         }
         
-        async function updatePublicPassword() {
+        function updatePublicPassword() {
             const newPwd = document.getElementById('newPublicPwd').value;
             const confirmPwd = document.getElementById('confirmPublicPwd').value;
             
@@ -853,42 +721,10 @@
                 return;
             }
             
-            showLoading(true);
-            
             state.publicPassword = newPwd;
-            const success = await saveUserData({
-                users: state.users,
-                publicPassword: state.publicPassword,
-                adminPassword: state.adminPassword,
-                version: '1.0'
-            });
-            
-            showLoading(false);
-            
-            if (success || !state.token) {
-                showToast('密码修改成功' + (!state.token ? ' (本地模式)' : ''));
-                document.getElementById('newPublicPwd').value = '';
-                document.getElementById('confirmPublicPwd').value = '';
-            } else {
-                showToast('保存失败，请重试', true);
-            }
-        }
-        
-        function renderUserList() {
-            const list = document.getElementById('userList');
-            if (state.users.length === 0) {
-                list.innerHTML = '<p style="color: #888;">暂无用户数据</p>';
-                return;
-            }
-            
-            list.innerHTML = state.users.map((user, i) => `
-                <div class="user-item">
-                    <div>
-                        <strong>${user.deviceId.substring(0, 15)}...</strong><br>
-                        <small style="color: #888;">试用: ${user.trials}次 | 最后登录: ${new Date(user.lastLogin).toLocaleDateString()}</small>
-                    </div>
-                </div>
-            `).join('');
+            showToast('密码已更新（仅本地生效）');
+            document.getElementById('newPublicPwd').value = '';
+            document.getElementById('confirmPublicPwd').value = '';
         }
         
         function closeTrialModal() {
@@ -896,158 +732,95 @@
             logout();
         }
         
-        // ====== 计算功能 ======
-        function calculate() {
-            const L_v = parseFloat(document.getElementById('L_v').value);
-            const L_s = parseFloat(document.getElementById('L_s').value);
-            const theta_v = parseFloat(document.getElementById('theta_v').value);
-            const theta_s = parseFloat(document.getElementById('theta_s').value);
-            const phi_v = parseFloat(document.getElementById('phi_v').value);
-            const phi_s = parseFloat(document.getElementById('phi_s').value);
-            const a = parseFloat(document.getElementById('a').value);
-            const advance = parseFloat(document.getElementById('advance').value);
-            const overbreak = parseFloat(document.getElementById('overbreak').value);
-            
-            const theta_v_rad = theta_v * Math.PI / 180;
-            const theta_s_rad = theta_s * Math.PI / 180;
-            
-            const results = [];
-            
-            const x_foot_v = L_v * Math.cos(theta_v_rad);
-            const x_foot_s = L_s * Math.cos(theta_s_rad);
-            const y_offset = a / 2;
-            
-            results.push({
-                name: '1# 垂直中',
-                x: (x_foot_v - advance - overbreak).toFixed(3),
-                y: '0.000',
-                z: '0.000',
-                angle: theta_v.toFixed(1),
-                depth: L_v.toFixed(2)
-            });
-            
-            results.push({
-                name: '2# 垂直右',
-                x: (x_foot_v - advance - overbreak).toFixed(3),
-                y: y_offset.toFixed(3),
-                z: '0.000',
-                angle: theta_v.toFixed(1),
-                depth: L_v.toFixed(2)
-            });
-            
-            results.push({
-                name: '3# 垂直左',
-                x: (x_foot_v - advance - overbreak).toFixed(3),
-                y: (-y_offset).toFixed(3),
-                z: '0.000',
-                angle: theta_v.toFixed(1),
-                depth: L_v.toFixed(2)
-            });
-            
-            const y_s = y_offset + a;
-            const z_s = L_s * Math.sin(theta_s_rad);
-            results.push({
-                name: '4# 倾斜右',
-                x: (x_foot_s - advance - overbreak).toFixed(3),
-                y: y_s.toFixed(3),
-                z: (-z_s).toFixed(3),
-                angle: theta_s.toFixed(1),
-                depth: L_s.toFixed(2)
-            });
-            
-            const y_s_left = -y_offset - a;
-            results.push({
-                name: '5# 倾斜左',
-                x: (x_foot_s - advance - overbreak).toFixed(3),
-                y: y_s_left.toFixed(3),
-                z: (-z_s).toFixed(3),
-                angle: theta_s.toFixed(1),
-                depth: L_s.toFixed(2)
-            });
-            
-            const tbody = document.getElementById('resultBody');
-            tbody.innerHTML = results.map(r => {
-                const xVal = parseFloat(r.x);
-                return `<tr>
-                    <td>${r.name}</td>
-                    <td class="${xVal < 0 ? 'warning' : ''}">${r.x}</td>
-                    <td>${r.y}</td>
-                    <td>${r.z}</td>
-                    <td>${r.angle}</td>
-                    <td>${r.depth}</td>
-                </tr>`;
-            }).join('');
-            
-            drawDiagram(results);
+        // ====== v2计算逻辑 ======
+        function updateL() {
+            const width = parseFloat(document.getElementById('width').value) || 0;
+            document.getElementById('L_auto').textContent = (width / 2).toFixed(2);
         }
         
-        function drawDiagram(results) {
-            const svg = document.getElementById('diagramSvg');
-            const width = 600;
-            const height = 400;
-            const centerX = width / 2;
-            const centerY = height - 50;
-            const dynScale = 50;
+        function calculate() {
+            // 获取基本参数
+            const b = parseFloat(document.getElementById('b').value);      // 开挖进尺
+            const c = parseFloat(document.getElementById('c').value);        // 推进梁长度
+            const width = parseFloat(document.getElementById('width').value); // 隧道宽度
+            const L = width / 2;                                             // 半幅活动宽度
+            const stepA = parseFloat(document.getElementById('stepA').value); // 布眼距离步长
+            const stepD = parseFloat(document.getElementById('stepD').value); // 孔底位置步长
             
-            function toSvg(x, y) {
-                return {
-                    x: centerX + x * dynScale,
-                    y: centerY - y * dynScale * 0.5
-                };
+            // 获取第一掏槽参数
+            const a1 = parseFloat(document.getElementById('a1').value);      // 第一掏槽布眼距离
+            const d1 = parseFloat(document.getElementById('d1').value);      // 第一掏槽孔底位置
+            
+            // 显示半幅活动宽度
+            document.getElementById('res_L').textContent = L.toFixed(2) + ' 米';
+            
+            // 计算各掏槽
+            const names = ['第一掏槽', '第二掏槽', '第三掏槽', '第四掏槽', '第五掏槽'];
+            const rows = [];
+            
+            for (let i = 0; i < 5; i++) {
+                const a = a1 + i * stepA;  // 布眼距离
+                const d = d1 + i * stepD;  // 孔底位置
+                
+                // 计算各值
+                const e = a - d;                                          // 相对底边
+                const c_depth = Math.sqrt(b * b + e * e);                 // 开挖深度
+                const angleB = Math.atan(b / e) * 180 / Math.PI;          // 开挖角度
+                const angleA = Math.atan(e / b) * 180 / Math.PI;           // 台车输入角度
+                const a_prime = c * Math.cos(Math.atan(b / e));            // 剩余底边
+                const space = a_prime + a;                                  // 共需空间距离
+                const remain = L - space;                                   // 剩余位置距离
+                
+                rows.push({
+                    name: names[i],
+                    a: a.toFixed(2),
+                    d: d.toFixed(2),
+                    e: e.toFixed(2),
+                    c: c_depth.toFixed(2),
+                    angleB: angleB.toFixed(2),
+                    angleA: angleA.toFixed(2),
+                    a_prime: a_prime.toFixed(2),
+                    space: space.toFixed(2),
+                    remain: remain.toFixed(2)
+                });
             }
             
-            let svgContent = '';
-            
-            // 网格
-            for (let i = -3; i <= 3; i++) {
-                const pos = toSvg(0, i);
-                svgContent += `<line x1="50" y1="${pos.y}" x2="${width-50}" y2="${pos.y}" stroke="rgba(255,255,255,0.1)" stroke-dasharray="5,5"/>`;
-            }
-            
-            // 隧道轮廓
-            svgContent += `<path d="M 50 100 L 50 300 L ${width-50} 300 L ${width-50} 100 Z" fill="none" stroke="rgba(255,107,107,0.5)" stroke-width="2" stroke-dasharray="10,5"/>`;
-            
-            // 掌子面
-            const faceX = toSvg(-1.5, 0).x;
-            svgContent += `<line x1="${faceX}" y1="30" x2="${faceX}" y2="${height-30}" stroke="#ff6b6b" stroke-width="3"/>`;
-            svgContent += `<text x="${faceX - 10}" y="25" fill="#ff6b6b" font-size="14">掌子面</text>`;
-            
-            // 掏槽眼
-            results.forEach((r, i) => {
-                const pos = toSvg(parseFloat(r.x), parseFloat(r.y));
-                svgContent += `<line x1="${faceX}" y1="${centerY}" x2="${pos.x}" y2="${pos.y}" stroke="#00d4ff" stroke-width="3" marker-end="url(#arrowhead)"/>`;
-                svgContent += `<circle cx="${pos.x}" cy="${pos.y}" r="8" fill="#00d4ff"/>`;
-                svgContent += `<text x="${pos.x + 10}" y="${pos.y + 5}" fill="#fff" font-size="12">${r.name.split(' ')[0]}</text>`;
-            });
-            
-            // 坐标轴
-            svgContent += `<line x1="50" y1="${centerY}" x2="${width-20}" y2="${centerY}" stroke="#fff" stroke-width="2"/>`;
-            svgContent += `<text x="${width-15}" y="${centerY - 5}" fill="#fff">X (m)</text>`;
-            
-            svg.innerHTML = `
-                <defs>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#00d4ff"/>
-                    </marker>
-                </defs>
-                ${svgContent}
-            `;
+            // 渲染结果表格
+            const tbody = document.getElementById('resultTable');
+            tbody.innerHTML = rows.map(row => `
+                <tr>
+                    <td>${row.name}</td>
+                    <td class="${parseFloat(row.a) < 0 ? 'negative' : ''}">${row.a}</td>
+                    <td class="${parseFloat(row.d) < 0 ? 'negative' : ''}">${row.d}</td>
+                    <td class="${parseFloat(row.e) < 0 ? 'negative' : ''}">${row.e}</td>
+                    <td class="${parseFloat(row.c) < 0 ? 'negative' : ''}">${row.c}</td>
+                    <td class="${parseFloat(row.angleB) < 0 ? 'negative' : ''}">${row.angleB}°</td>
+                    <td class="result-highlight ${parseFloat(row.angleA) < 0 ? 'negative' : ''}">${row.angleA}°</td>
+                    <td class="${parseFloat(row.a_prime) < 0 ? 'negative' : ''}">${row.a_prime}</td>
+                    <td class="${parseFloat(row.space) < 0 ? 'negative' : ''}">${row.space}</td>
+                    <td class="${parseFloat(row.remain) < 0 ? 'negative' : ''}">${row.remain}</td>
+                </tr>
+            `).join('');
         }
         
         // ====== 初始化 ======
-        async function init() {
+        function init() {
             // 生成设备ID
             if (!state.deviceId) {
                 state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('tunnel_device_id', state.deviceId);
             }
             
-            // 检查设置状态
-            if (!state.setupDone) {
-                document.getElementById('setupScreen').style.display = 'block';
-            } else {
-                showLogin();
-            }
+            // 绑定事件
+            document.getElementById('width').addEventListener('input', updateL);
+            document.getElementById('stepA').addEventListener('input', function() {
+                document.getElementById('stepA_val').textContent = this.value;
+            });
+            document.getElementById('stepD').addEventListener('input', function() {
+                document.getElementById('stepD_val').textContent = this.value;
+            });
+            
+            updateL();
         }
         
         init();
