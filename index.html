@@ -1114,23 +1114,20 @@
                 const angleB = angles[i];   // 角B（与掌子面夹角）
                 const color = colors[i % colors.length];
                 
-                // 计算孔底Y坐标：孔深 * sin(角B)
-                // 角B是孔与掌子面的夹角，sin(角B) = 推进深度 / 孔深
-                const depthY = depth * Math.sin(angleB * Math.PI / 180) * scale;
+                // 孔底Y坐标：由开挖进尺b决定（所有掏槽推进深度相同）
+                const endY = faceY - b * scale;
                 
                 // 左侧掏槽眼
                 const leftX = centerX - a * scale;      // 左侧孔口X
                 const leftEndX = centerX - d * scale;   // 左侧孔底X
-                const leftEndY = faceY - depthY;        // 左侧孔底Y
                 
-                drawInclinedHole(ctx, leftX, faceY, leftEndX, leftEndY, color, i + 1, a, d, depth, angleB, '左');
+                drawInclinedHole(ctx, leftX, faceY, leftEndX, endY, color, i + 1, a, d, depth, angleB, '左');
                 
                 // 右侧掏槽眼
                 const rightX = centerX + a * scale;     // 右侧孔口X
                 const rightEndX = centerX + d * scale;  // 右侧孔底X
-                const rightEndY = faceY - depthY;       // 右侧孔底Y
                 
-                drawInclinedHole(ctx, rightX, faceY, rightEndX, rightEndY, color, i + 1, a, d, depth, angleB, '右');
+                drawInclinedHole(ctx, rightX, faceY, rightEndX, endY, color, i + 1, a, d, depth, angleB, '右');
             }
             
             // 绘制图例背景
