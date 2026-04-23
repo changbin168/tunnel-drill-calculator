@@ -11,7 +11,7 @@
             box-sizing: border-box;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             padding: 20px;
@@ -24,12 +24,11 @@
         
         /* 登录界面 */
         .login-screen {
-            max-width: 400px;
+            max-width: 450px;
             margin: 80px auto;
             background: rgba(255,255,255,0.1);
             padding: 40px;
             border-radius: 20px;
-            backdrop-filter: blur(10px);
         }
         .login-screen h2 {
             text-align: center;
@@ -49,20 +48,14 @@
         .login-screen button {
             width: 100%;
             padding: 15px;
-            margin-top: 20px;
+            margin-top: 15px;
             border: none;
             border-radius: 8px;
             font-size: 18px;
             cursor: pointer;
         }
-        .btn-public {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #fff;
-        }
-        .btn-admin {
-            background: #ff6b6b;
-            color: #fff;
-        }
+        .btn-public { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
+        .btn-admin { background: #ff6b6b; color: #fff; }
         .login-tabs {
             display: flex;
             gap: 10px;
@@ -75,18 +68,26 @@
             color: #888;
             border: none;
             border-radius: 8px;
+        }
+        .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
+        .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
+        .pwd-list {
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .pwd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 5px 0;
             font-size: 14px;
         }
-        .login-tabs button.active {
-            background: #00d4ff;
-            color: #1a1a2e;
-        }
-        .error-msg {
-            color: #ff6b6b;
-            text-align: center;
-            margin-top: 10px;
-            display: none;
-        }
+        .pwd-item span { color: #888; }
+        .pwd-item .uses { color: #00d4ff; }
         
         /* 试用限制弹窗 */
         .trial-modal {
@@ -101,9 +102,7 @@
             align-items: center;
             z-index: 1000;
         }
-        .trial-modal.show {
-            display: flex;
-        }
+        .trial-modal.show { display: flex; }
         .trial-modal-content {
             background: #1a1a2e;
             padding: 40px;
@@ -111,15 +110,8 @@
             text-align: center;
             max-width: 400px;
         }
-        .trial-modal h3 {
-            color: #ff6b6b;
-            margin-bottom: 20px;
-        }
-        .trial-modal p {
-            color: #888;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
+        .trial-modal h3 { color: #ff6b6b; margin-bottom: 20px; }
+        .trial-modal p { color: #888; line-height: 1.6; margin-bottom: 20px; }
         .trial-modal button {
             background: #00d4ff;
             color: #1a1a2e;
@@ -138,82 +130,69 @@
             border-radius: 20px;
             margin-bottom: 30px;
         }
-        .admin-panel.show {
-            display: block;
-        }
-        .admin-panel h2 {
-            color: #ff6b6b;
-            margin-bottom: 20px;
-        }
-        .admin-panel input {
+        .admin-panel.show { display: block; }
+        .admin-panel h2 { color: #ff6b6b; margin-bottom: 20px; }
+        .admin-panel h3 { color: #00d4ff; margin: 20px 0 10px 0; }
+        .admin-panel input, .admin-panel select {
             width: 100%;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 8px 0;
             border: 2px solid rgba(0,212,255,0.3);
             border-radius: 8px;
             background: rgba(255,255,255,0.1);
             color: #fff;
-            font-size: 16px;
+            font-size: 14px;
         }
         .admin-panel button {
-            padding: 15px 30px;
+            padding: 12px 25px;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
+            margin: 5px 5px 5px 0;
         }
-        .btn-save {
-            background: linear-gradient(135deg, #00d4ff, #0099cc);
-            color: #fff;
-        }
-        .btn-cancel {
-            background: #666;
-            color: #fff;
-        }
-        .user-list {
-            margin: 20px 0;
-        }
-        .user-item {
-            background: rgba(255,255,255,0.05);
+        .btn-save { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
+        .btn-danger { background: #ff6b6b; color: #fff; }
+        .btn-cancel { background: #666; color: #fff; }
+        
+        .password-list-admin {
+            background: rgba(0,0,0,0.2);
             padding: 15px;
             border-radius: 10px;
+            margin: 15px 0;
+        }
+        .pwd-admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
             margin: 10px 0;
         }
+        .pwd-admin-item .info { flex: 1; }
+        .pwd-admin-item .info strong { color: #00d4ff; }
+        .pwd-admin-item .info small { color: #888; display: block; margin-top: 5px; }
+        .pwd-admin-item .actions button {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        .remaining { color: #00ff88; }
+        .expired { color: #ff6b6b; }
         
         /* 主界面 */
-        .main-content {
-            display: none;
-        }
-        .main-content.show {
-            display: block;
-        }
+        .main-content { display: none; }
+        .main-content.show { display: block; }
         
         .header {
-            position: relative;
             text-align: center;
             margin-bottom: 25px;
             padding-bottom: 15px;
             border-bottom: 2px solid rgba(0,212,255,0.3);
         }
-        .header-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .header h1 {
-            color: #00d4ff;
-            font-size: 1.4rem;
-            margin: 0;
-            text-shadow: 0 0 10px rgba(0,212,255,0.5);
-        }
-        .header h2 {
-            color: #fff;
-            font-size: 1.2rem;
-            margin: 5px 0 0 0;
-            font-weight: normal;
-        }
+        .header h1 { color: #00d4ff; font-size: 1.4rem; text-shadow: 0 0 10px rgba(0,212,255,0.5); }
+        .header h2 { color: #fff; font-size: 1.2rem; margin-top: 5px; font-weight: normal; }
+        
         .user-bar {
             background: rgba(0,212,255,0.1);
             padding: 15px;
@@ -231,20 +210,13 @@
             border-radius: 8px;
             cursor: pointer;
         }
-        .creator {
-            text-align: right;
-            color: #ff6666;
-            font-size: 0.75rem;
-            margin-top: 30px;
-            padding-bottom: 10px;
-        }
+        
+        .creator { text-align: right; color: #ff6666; font-size: 0.75rem; margin-top: 30px; }
         .card {
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
         }
         .card h2 {
             color: #00d4ff;
@@ -258,15 +230,8 @@
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 15px;
         }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .input-group label {
-            margin-bottom: 8px;
-            color: #ccc;
-            font-size: 0.95rem;
-        }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { margin-bottom: 8px; color: #ccc; font-size: 0.95rem; }
         .input-group input {
             padding: 12px 15px;
             border: 2px solid rgba(0,212,255,0.3);
@@ -274,18 +239,9 @@
             background: rgba(255,255,255,0.1);
             color: #fff;
             font-size: 1rem;
-            transition: all 0.3s;
         }
-        .input-group input:focus {
-            outline: none;
-            border-color: #00d4ff;
-            background: rgba(0,212,255,0.1);
-        }
-        .input-group .unit {
-            color: #888;
-            font-size: 0.85rem;
-            margin-top: 5px;
-        }
+        .input-group input:focus { outline: none; border-color: #00d4ff; }
+        .input-group .unit { color: #888; font-size: 0.85rem; margin-top: 5px; }
         .btn {
             background: linear-gradient(135deg, #00d4ff, #0099cc);
             color: #fff;
@@ -295,41 +251,16 @@
             font-size: 1.1rem;
             cursor: pointer;
             margin-top: 20px;
-            transition: all 0.3s;
             width: 100%;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,212,255,0.4);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            padding: 12px 8px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        th {
-            background: rgba(0,212,255,0.3);
-            color: #fff;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        td {
-            background: rgba(255,255,255,0.05);
-            font-size: 0.9rem;
-        }
-        .result-highlight {
-            color: #00ff88;
-            font-weight: bold;
-        }
-        .negative {
-            color: #ff4444 !important;
-            font-weight: bold;
-        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,212,255,0.4); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        th { background: rgba(0,212,255,0.3); font-weight: 600; font-size: 0.85rem; }
+        td { background: rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .result-highlight { color: #00ff88; font-weight: bold; }
+        .negative { color: #ff4444 !important; font-weight: bold; }
         .formula-note {
             background: rgba(255,193,7,0.2);
             border-left: 4px solid #ffc107;
@@ -337,11 +268,7 @@
             margin: 15px 0;
             border-radius: 0 8px 8px 0;
         }
-        .formula-note p {
-            margin: 5px 0;
-            font-size: 0.9rem;
-            color: #ffc107;
-        }
+        .formula-note p { margin: 5px 0; font-size: 0.9rem; color: #ffc107; }
         .info-row {
             display: flex;
             justify-content: space-between;
@@ -350,38 +277,8 @@
             border-radius: 8px;
             margin: 5px 0;
         }
-        .info-row span:first-child {
-            color: #888;
-        }
-        .info-row span:last-child {
-            color: #00d4ff;
-            font-weight: bold;
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 15px;
-        }
-        .table-wrapper table {
-            min-width: 800px;
-        }
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            h1 {
-                font-size: 1.4rem;
-            }
-            .card {
-                padding: 15px;
-            }
-            table {
-                font-size: 0.8rem;
-            }
-            th, td {
-                padding: 8px 4px;
-            }
-        }
+        .table-wrapper { overflow-x: auto; margin-top: 15px; }
+        .table-wrapper table { min-width: 800px; }
         
         /* Toast */
         .toast {
@@ -396,23 +293,12 @@
             display: none;
             z-index: 1000;
         }
-        .toast.show {
-            display: block;
-        }
-        .toast.error {
-            background: rgba(255,107,107,0.9);
-            color: #fff;
-        }
+        .toast.show { display: block; }
+        .toast.error { background: rgba(255,107,107,0.9); color: #fff; }
         
         /* 加载 */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-        }
-        .loading.show {
-            display: block;
-        }
+        .loading { display: none; text-align: center; padding: 40px; }
+        .loading.show { display: block; }
         .spinner {
             border: 4px solid rgba(255,255,255,0.1);
             border-top: 4px solid #00d4ff;
@@ -422,15 +308,11 @@
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 加载中 -->
         <div class="loading" id="loading">
             <div class="spinner"></div>
             <p style="margin-top: 20px;">加载中...</p>
@@ -443,16 +325,30 @@
                 <button class="active" onclick="switchTab('public')">公用账户</button>
                 <button onclick="switchTab('admin')">管理账户</button>
             </div>
-            <input type="password" id="password" placeholder="请输入密码">
-            <div class="error-msg" id="errorMsg">密码错误</div>
-            <button class="btn-public" id="loginBtn" onclick="login()">登录</button>
+            
+            <!-- 公用账户 -->
+            <div id="publicLogin">
+                <div class="pwd-list" id="pwdList">
+                    <!-- 动态显示可用密码 -->
+                </div>
+                <input type="password" id="password" placeholder="选择或输入密码">
+                <div class="error-msg" id="errorMsg">密码错误或已用完</div>
+                <button class="btn-public" onclick="loginPublic()">登录</button>
+            </div>
+            
+            <!-- 管理账户 -->
+            <div id="adminLogin" style="display:none;">
+                <input type="password" id="adminPassword" placeholder="管理密码">
+                <div class="error-msg" id="adminErrorMsg">密码错误</div>
+                <button class="btn-admin" onclick="loginAdmin()">进入管理</button>
+            </div>
         </div>
         
         <!-- 试用限制弹窗 -->
         <div class="trial-modal" id="trialModal">
             <div class="trial-modal-content">
-                <h3>⚠️ 试用次数已用完</h3>
-                <p>您已使用完3次试用机会。<br><br>如需继续使用，请联系：</p>
+                <h3>⚠️ 该密码已用完</h3>
+                <p>此密码的试用次数已用完。<br><br>如需继续使用，请联系：</p>
                 <p style="color: #00d4ff; font-size: 18px; font-weight: bold;">
                     四川交建智能装备分公司<br>常彬
                 </p>
@@ -462,35 +358,56 @@
         
         <!-- 管理面板 -->
         <div class="admin-panel" id="adminPanel">
-            <h2>⚙️ 管理面板</h2>
-            <div class="user-list" id="userList">
-                <p style="color: #888;">暂无用户数据</p>
+            <h2>⚙️ 密码管理</h2>
+            
+            <h3>➕ 添加新密码</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>密码</label>
+                    <input type="text" id="newPwd" placeholder="输入密码">
+                </div>
+                <div class="input-group">
+                    <label>可用次数</label>
+                    <input type="number" id="newPwdUses" value="10" min="1">
+                </div>
             </div>
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
-            <h3>修改公用账户密码</h3>
-            <input type="password" id="newPublicPwd" placeholder="新公用密码（6位以上）">
-            <input type="password" id="confirmPublicPwd" placeholder="确认新密码">
-            <div style="margin-top: 20px;">
-                <button class="btn-save" onclick="updatePublicPassword()">保存密码</button>
+            <div style="margin-top: 10px;">
+                <button class="btn-save" onclick="addPassword()">➕ 添加密码</button>
                 <button class="btn-cancel" onclick="logout()">返回</button>
             </div>
+            
+            <h3>📋 当前密码列表</h3>
+            <div class="password-list-admin" id="pwdListAdmin">
+                <!-- 动态生成 -->
+            </div>
+            
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+            <h3>🔐 修改管理密码</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>新管理密码</label>
+                    <input type="text" id="newAdminPwd" placeholder="输入新管理密码">
+                </div>
+                <div class="input-group">
+                    <label>确认密码</label>
+                    <input type="text" id="confirmAdminPwd" placeholder="确认新密码">
+                </div>
+            </div>
+            <button class="btn-save" onclick="updateAdminPassword()" style="margin-top: 10px;">保存管理密码</button>
         </div>
         
         <!-- 主界面 -->
         <div class="main-content" id="mainContent">
             <div class="header">
-                <div class="header-content">
-                    <h1>四川交建智能装备分公司</h1>
-                    <h2>三臂凿岩台车开挖角度计算器</h2>
-                </div>
+                <h1>四川交建智能装备分公司</h1>
+                <h2>三臂凿岩台车开挖角度计算器</h2>
             </div>
             
             <div class="user-bar">
-                <span id="userStatus">📱 公用账户 | 剩余试用: 3次</span>
+                <span id="userStatus">📱 公用账户</span>
                 <button onclick="logout()">退出登录</button>
             </div>
             
-            <!-- 基本参数 -->
             <div class="card">
                 <h2>📐 基本参数</h2>
                 <div class="input-grid">
@@ -520,15 +437,12 @@
                         <span class="unit">每级增加孔底位置（米）</span>
                     </div>
                 </div>
-                
                 <div class="formula-note">
                     <p>📌 半幅活动宽度 L = 隧道宽度 ÷ 2 = <span id="L_auto">8.175</span> 米</p>
                 </div>
-                
                 <button class="btn" onclick="calculate()">🧮 计算</button>
             </div>
             
-            <!-- 各掏槽参数 -->
             <div class="card">
                 <h2>📍 各掏槽布眼距离与孔底位置</h2>
                 <div class="input-grid">
@@ -549,36 +463,31 @@
                 </div>
             </div>
             
-            <!-- 计算结果 -->
             <div class="card" id="resultCard">
                 <h2>📊 计算结果</h2>
-                
                 <div class="info-row">
                     <span>半幅活动宽度 (L)</span>
                     <span id="res_L">-</span>
                 </div>
-                
                 <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>名称</th>
-                            <th>布眼距离<br>(a)</th>
-                            <th>孔底位置<br>(d)</th>
-                            <th>相对底边<br>(e=a-d)</th>
-                            <th>开挖深度<br>(c)</th>
-                            <th>开挖角度<br>(∠B)</th>
-                            <th class="result-highlight">台车输入<br>(∠A')</th>
-                            <th>剩余底边<br>(a')</th>
-                            <th>共需空间<br>距离</th>
-                            <th>剩余位置<br>距离</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resultTable">
-                    </tbody>
-                </table>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>布眼距离(a)</th>
+                                <th>孔底位置(d)</th>
+                                <th>相对底边(e)</th>
+                                <th>开挖深度(c)</th>
+                                <th>开挖角度(∠B)</th>
+                                <th class="result-highlight">台车输入(∠A')</th>
+                                <th>剩余底边(a')</th>
+                                <th>共需空间</th>
+                                <th>剩余位置</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultTable"></tbody>
+                    </table>
                 </div>
-                
                 <div class="formula-note" style="font-size:0.8rem;">
                     <p><strong>📐 台车输入角度 ∠A' = ATAN(e/b)</strong></p>
                     <p>简化：e=相对底边，b=开挖进尺，L=半幅宽度</p>
@@ -588,28 +497,21 @@
         </div>
     </div>
     
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
     
     <script>
-        // ====== 配置 ======
-        const CONFIG = {
-            repo: 'changbin168/tunnel-drill-calculator',
-            branch: 'main',
-            dataPath: 'user_data.json'
-        };
-        
         // ====== 状态 ======
         let state = {
             loginType: 'public',
             isLoggedIn: false,
             isAdmin: false,
-            deviceId: localStorage.getItem('tunnel_device_id') || '',
-            users: [],
-            publicPassword: 'Cb17612833821.',
+            usedPassword: '',
+            passwords: [
+                { pwd: 'Cb17612833821.', uses: 10, used: 0 },
+                { pwd: '456', uses: 5, used: 0 }
+            ],
             adminPassword: 'admin2026',
-            trialCount: parseInt(localStorage.getItem('tunnel_trial_count') || '0'),
-            MAX_TRIALS: 3
+            deviceId: localStorage.getItem('tunnel_device_id') || ''
         };
         
         // ====== 工具函数 ======
@@ -629,56 +531,88 @@
             state.loginType = type;
             document.querySelectorAll('.login-tabs button').forEach(btn => {
                 btn.classList.remove('active');
-                if ((type === 'public' && btn.textContent === '公用账户') ||
-                    (type === 'admin' && btn.textContent === '管理账户')) {
-                    btn.classList.add('active');
-                }
             });
-            document.getElementById('loginBtn').className = type === 'public' ? 'btn-public' : 'btn-admin';
-            document.getElementById('loginBtn').textContent = type === 'public' ? '公用账户登录' : '管理账户登录';
+            event.target.classList.add('active');
+            
+            document.getElementById('publicLogin').style.display = type === 'public' ? 'block' : 'none';
+            document.getElementById('adminLogin').style.display = type === 'admin' ? 'block' : 'none';
             document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('adminErrorMsg').style.display = 'none';
+            
+            if (type === 'public') {
+                renderPasswordList();
+            }
         }
         
-        function login() {
-            const password = document.getElementById('password').value;
-            document.getElementById('errorMsg').style.display = 'none';
+        function renderPasswordList() {
+            const list = document.getElementById('pwdList');
+            const available = state.passwords.filter(p => p.used < p.uses);
+            const expired = state.passwords.filter(p => p.used >= p.uses);
             
-            showLoading(true);
+            let html = '';
             
-            // 公用账户
-            if (state.loginType === 'public') {
-                if (password !== state.publicPassword) {
-                    showLoading(false);
-                    document.getElementById('errorMsg').textContent = '密码错误';
-                    document.getElementById('errorMsg').style.display = 'block';
-                    return;
-                }
-                
-                if (state.trialCount >= state.MAX_TRIALS) {
-                    showLoading(false);
-                    document.getElementById('trialModal').classList.add('show');
-                    return;
-                }
-                
-                // 增加试用次数
-                state.trialCount++;
-                localStorage.setItem('tunnel_trial_count', state.trialCount.toString());
-                
-                showLoading(false);
-                showMain();
-                
-            } else {
-                // 管理账户
-                if (password !== state.adminPassword) {
-                    showLoading(false);
-                    document.getElementById('errorMsg').textContent = '管理员密码错误';
-                    document.getElementById('errorMsg').style.display = 'block';
-                    return;
-                }
-                
-                showLoading(false);
-                showAdmin();
+            if (available.length > 0) {
+                html += '<p style="color:#888;margin-bottom:10px;">可用密码：</p>';
+                available.forEach(p => {
+                    const remaining = p.uses - p.used;
+                    html += `<div class="pwd-item">
+                        <span>${p.pwd}</span>
+                        <span class="uses">剩余 ${remaining}/${p.uses} 次</span>
+                    </div>`;
+                });
             }
+            
+            if (expired.length > 0) {
+                html += '<p style="color:#ff6b6b;margin:15px 0 10px 0;">已用完：</p>';
+                expired.forEach(p => {
+                    html += `<div class="pwd-item" style="opacity:0.5;">
+                        <span>${p.pwd}</span>
+                        <span style="color:#ff6b6b;">已用完</span>
+                    </div>`;
+                });
+            }
+            
+            if (state.passwords.length === 0) {
+                html = '<p style="color:#888;text-align:center;">暂无可用密码</p>';
+            }
+            
+            list.innerHTML = html;
+        }
+        
+        function loginPublic() {
+            const password = document.getElementById('password').value;
+            
+            // 查找密码
+            const pwdObj = state.passwords.find(p => p.pwd === password);
+            
+            if (!pwdObj) {
+                document.getElementById('errorMsg').textContent = '密码错误';
+                document.getElementById('errorMsg').style.display = 'block';
+                return;
+            }
+            
+            if (pwdObj.used >= pwdObj.uses) {
+                document.getElementById('trialModal').classList.add('show');
+                return;
+            }
+            
+            // 使用密码
+            pwdObj.used++;
+            state.usedPassword = password;
+            
+            showToast(`登录成功！密码 "${password}" 剩余 ${pwdObj.uses - pwdObj.used} 次`);
+            showMain();
+        }
+        
+        function loginAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password !== state.adminPassword) {
+                document.getElementById('adminErrorMsg').style.display = 'block';
+                return;
+            }
+            
+            showAdmin();
         }
         
         function showMain() {
@@ -687,7 +621,7 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('adminPanel').classList.remove('show');
             document.getElementById('mainContent').classList.add('show');
-            document.getElementById('userStatus').textContent = `📱 公用账户 | 剩余试用: ${state.MAX_TRIALS - state.trialCount}次`;
+            document.getElementById('userStatus').textContent = `📱 公用账户 | 密码 ${state.usedPassword} | 剩余 ${getRemainingUses(state.usedPassword)} 次`;
             calculate();
         }
         
@@ -697,6 +631,13 @@
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('show');
             document.getElementById('adminPanel').classList.add('show');
+            renderAdminPasswordList();
+        }
+        
+        function getRemainingUses(pwd) {
+            const pwdObj = state.passwords.find(p => p.pwd === pwd);
+            if (!pwdObj) return 0;
+            return pwdObj.uses - pwdObj.used;
         }
         
         function logout() {
@@ -706,30 +647,96 @@
             document.getElementById('adminPanel').classList.remove('show');
             document.getElementById('mainContent').classList.remove('show');
             document.getElementById('password').value = '';
+            document.getElementById('adminPassword').value = '';
+            renderPasswordList();
         }
         
-        function updatePublicPassword() {
-            const newPwd = document.getElementById('newPublicPwd').value;
-            const confirmPwd = document.getElementById('confirmPublicPwd').value;
+        function closeTrialModal() {
+            document.getElementById('trialModal').classList.remove('show');
+        }
+        
+        // ====== 管理功能 ======
+        function addPassword() {
+            const pwd = document.getElementById('newPwd').value.trim();
+            const uses = parseInt(document.getElementById('newPwdUses').value) || 10;
             
-            if (newPwd.length < 6) {
-                showToast('密码至少6位', true);
+            if (!pwd) {
+                showToast('请输入密码', true);
                 return;
             }
+            
+            if (state.passwords.find(p => p.pwd === pwd)) {
+                showToast('该密码已存在', true);
+                return;
+            }
+            
+            state.passwords.push({ pwd, uses, used: 0 });
+            showToast(`密码 "${pwd}" 添加成功，可用 ${uses} 次`);
+            
+            document.getElementById('newPwd').value = '';
+            document.getElementById('newPwdUses').value = '10';
+            renderAdminPasswordList();
+        }
+        
+        function deletePassword(pwd) {
+            state.passwords = state.passwords.filter(p => p.pwd !== pwd);
+            showToast(`密码 "${pwd}" 已删除`);
+            renderAdminPasswordList();
+        }
+        
+        function resetPassword(pwd) {
+            const pwdObj = state.passwords.find(p => p.pwd === pwd);
+            if (pwdObj) {
+                pwdObj.used = 0;
+                showToast(`密码 "${pwd}" 已重置`);
+                renderAdminPasswordList();
+            }
+        }
+        
+        function renderAdminPasswordList() {
+            const list = document.getElementById('pwdListAdmin');
+            
+            if (state.passwords.length === 0) {
+                list.innerHTML = '<p style="color:#888;text-align:center;">暂无密码，请添加</p>';
+                return;
+            }
+            
+            list.innerHTML = state.passwords.map(p => {
+                const remaining = p.uses - p.used;
+                const isExpired = remaining <= 0;
+                return `<div class="pwd-admin-item">
+                    <div class="info">
+                        <strong>${p.pwd}</strong>
+                        <small class="${isExpired ? 'expired' : 'remaining'}">
+                            ${isExpired ? '已用完' : `剩余 ${remaining}/${p.uses} 次`}
+                        </small>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-save" onclick="resetPassword('${p.pwd}')">重置</button>
+                        <button class="btn-danger" onclick="deletePassword('${p.pwd}')">删除</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+        
+        function updateAdminPassword() {
+            const newPwd = document.getElementById('newAdminPwd').value.trim();
+            const confirmPwd = document.getElementById('confirmAdminPwd').value.trim();
+            
+            if (!newPwd || newPwd.length < 4) {
+                showToast('管理密码至少4位', true);
+                return;
+            }
+            
             if (newPwd !== confirmPwd) {
                 showToast('两次密码不一致', true);
                 return;
             }
             
-            state.publicPassword = newPwd;
-            showToast('密码已更新（仅本地生效）');
-            document.getElementById('newPublicPwd').value = '';
-            document.getElementById('confirmPublicPwd').value = '';
-        }
-        
-        function closeTrialModal() {
-            document.getElementById('trialModal').classList.remove('show');
-            logout();
+            state.adminPassword = newPwd;
+            showToast('管理密码已更新');
+            document.getElementById('newAdminPwd').value = '';
+            document.getElementById('confirmAdminPwd').value = '';
         }
         
         // ====== v2计算逻辑 ======
@@ -739,53 +746,38 @@
         }
         
         function calculate() {
-            // 获取基本参数
-            const b = parseFloat(document.getElementById('b').value);      // 开挖进尺
-            const c = parseFloat(document.getElementById('c').value);        // 推进梁长度
-            const width = parseFloat(document.getElementById('width').value); // 隧道宽度
-            const L = width / 2;                                             // 半幅活动宽度
-            const stepA = parseFloat(document.getElementById('stepA').value); // 布眼距离步长
-            const stepD = parseFloat(document.getElementById('stepD').value); // 孔底位置步长
+            const b = parseFloat(document.getElementById('b').value);
+            const c = parseFloat(document.getElementById('c').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const L = width / 2;
+            const stepA = parseFloat(document.getElementById('stepA').value);
+            const stepD = parseFloat(document.getElementById('stepD').value);
+            const a1 = parseFloat(document.getElementById('a1').value);
+            const d1 = parseFloat(document.getElementById('d1').value);
             
-            // 获取第一掏槽参数
-            const a1 = parseFloat(document.getElementById('a1').value);      // 第一掏槽布眼距离
-            const d1 = parseFloat(document.getElementById('d1').value);      // 第一掏槽孔底位置
-            
-            // 显示半幅活动宽度
             document.getElementById('res_L').textContent = L.toFixed(2) + ' 米';
             
-            // 计算各掏槽
             const names = ['第一掏槽', '第二掏槽', '第三掏槽', '第四掏槽', '第五掏槽'];
             const rows = [];
             
             for (let i = 0; i < 5; i++) {
-                const a = a1 + i * stepA;  // 布眼距离
-                const d = d1 + i * stepD;  // 孔底位置
-                
-                // 计算各值
-                const e = a - d;                                          // 相对底边
-                const c_depth = Math.sqrt(b * b + e * e);                 // 开挖深度
-                const angleB = Math.atan(b / e) * 180 / Math.PI;          // 开挖角度
-                const angleA = Math.atan(e / b) * 180 / Math.PI;           // 台车输入角度
-                const a_prime = c * Math.cos(Math.atan(b / e));            // 剩余底边
-                const space = a_prime + a;                                  // 共需空间距离
-                const remain = L - space;                                   // 剩余位置距离
+                const a = a1 + i * stepA;
+                const d = d1 + i * stepD;
+                const e = a - d;
+                const c_depth = Math.sqrt(b * b + e * e);
+                const angleB = Math.atan(b / e) * 180 / Math.PI;
+                const angleA = Math.atan(e / b) * 180 / Math.PI;
+                const a_prime = c * Math.cos(Math.atan(b / e));
+                const space = a_prime + a;
+                const remain = L - space;
                 
                 rows.push({
-                    name: names[i],
-                    a: a.toFixed(2),
-                    d: d.toFixed(2),
-                    e: e.toFixed(2),
-                    c: c_depth.toFixed(2),
-                    angleB: angleB.toFixed(2),
-                    angleA: angleA.toFixed(2),
-                    a_prime: a_prime.toFixed(2),
-                    space: space.toFixed(2),
-                    remain: remain.toFixed(2)
+                    name: names[i], a: a.toFixed(2), d: d.toFixed(2), e: e.toFixed(2),
+                    c: c_depth.toFixed(2), angleB: angleB.toFixed(2), angleA: angleA.toFixed(2),
+                    a_prime: a_prime.toFixed(2), space: space.toFixed(2), remain: remain.toFixed(2)
                 });
             }
             
-            // 渲染结果表格
             const tbody = document.getElementById('resultTable');
             tbody.innerHTML = rows.map(row => `
                 <tr>
@@ -805,13 +797,11 @@
         
         // ====== 初始化 ======
         function init() {
-            // 生成设备ID
             if (!state.deviceId) {
                 state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 localStorage.setItem('tunnel_device_id', state.deviceId);
             }
             
-            // 绑定事件
             document.getElementById('width').addEventListener('input', updateL);
             document.getElementById('stepA').addEventListener('input', function() {
                 document.getElementById('stepA_val').textContent = this.value;
@@ -821,6 +811,7 @@
             });
             
             updateL();
+            renderPasswordList();
         }
         
         init();
