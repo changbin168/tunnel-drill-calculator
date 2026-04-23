@@ -611,7 +611,7 @@
                     </div>
                     <div class="input-group">
                         <label>孔底位置增加值</label>
-                        <input type="number" id="stepD" value="0.25" step="0.01" onchange="calculate()">
+                        <input type="number" id="stepD" value="1.1" step="0.01" onchange="calculate()">
                         <span class="unit">米/级</span>
                         <span class="param-hint">每级掏槽增加的孔底距离</span>
                     </div>
@@ -638,7 +638,7 @@
                     </div>
                 </div>
                 <div class="formula-note">
-                    <p>📌 第二掏槽：布眼距离 = a₁ + <span id="stepA_val">0.7</span>m，孔底位置 = d₁ + <span id="stepD_val">0.25</span>m</p>
+                    <p>📌 第二掏槽：布眼距离 = a₁ + <span id="stepA_val">0.7</span>m，孔底位置 = d₁ + <span id="stepD_val">1.1</span>m</p>
                     <p>📌 第三掏槽 = 第二掏槽 + 布眼间距增加值 + 孔底位置增加值，以此类推...</p>
                 </div>
                 <button class="btn" onclick="calculate()">🧮 计算结果</button>
