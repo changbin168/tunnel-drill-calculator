@@ -3,706 +3,894 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>隧道进尺角度计算器</title>
+    <title>三臂凿岩台车开挖角度计算</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Microsoft YaHei', Arial, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; color: #fff; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
         
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        
-        /* 头部 */
-        .header { text-align: center; padding: 30px 0; }
-        .header h1 { font-size: 2.5em; color: #00d4ff; text-shadow: 0 0 20px rgba(0,212,255,0.5); margin-bottom: 10px; }
-        .header p { color: #aaa; font-size: 1.1em; }
-        
-        /* 登录页面 */
-        .login-section { display: flex; justify-content: center; align-items: center; min-height: 70vh; }
-        .login-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; width: 400px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
-        .login-box h2 { margin-bottom: 30px; color: #00d4ff; font-size: 1.8em; }
-        .login-box input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #00d4ff; border-radius: 10px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1.1em; text-align: center; }
-        .login-box input::placeholder { color: #888; }
-        .login-box button { width: 100%; padding: 15px; margin-top: 20px; border: none; border-radius: 10px; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        /* 登录界面 */
+        .login-screen {
+            max-width: 450px;
+            margin: 80px auto;
+            background: rgba(255,255,255,0.1);
+            padding: 40px;
+            border-radius: 20px;
+        }
+        .login-screen h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #00d4ff;
+        }
+        .login-screen input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+        .login-screen button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
         .btn-public { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
-        .btn-public:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,212,255,0.4); }
-        .btn-admin { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); color: #fff; margin-top: 10px; }
-        .btn-admin:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,107,107,0.4); }
-        .login-error { color: #ff6b6b; margin-top: 15px; display: none; font-size: 0.95em; }
-        .login-hint { color: #888; margin-top: 20px; font-size: 0.9em; }
+        .btn-admin { background: #ff6b6b; color: #fff; }
+        .login-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .login-tabs button {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            color: #888;
+            border: none;
+            border-radius: 8px;
+        }
+        .login-tabs button.active { background: #00d4ff; color: #1a1a2e; }
+        .error-msg { color: #ff6b6b; text-align: center; margin-top: 10px; display: none; }
+        .pwd-list {
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .pwd-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .pwd-item span { color: #888; }
+        .pwd-item .uses { color: #00d4ff; }
+        
+        /* 试用限制弹窗 */
+        .trial-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .trial-modal.show { display: flex; }
+        .trial-modal-content {
+            background: #1a1a2e;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+        }
+        .trial-modal h3 { color: #ff6b6b; margin-bottom: 20px; }
+        .trial-modal p { color: #888; line-height: 1.6; margin-bottom: 20px; }
+        .trial-modal button {
+            background: #00d4ff;
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        /* 管理面板 */
+        .admin-panel {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        .admin-panel.show { display: block; }
+        .admin-panel h2 { color: #ff6b6b; margin-bottom: 20px; }
+        .admin-panel h3 { color: #00d4ff; margin: 20px 0 10px 0; }
+        .admin-panel input, .admin-panel select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 14px;
+        }
+        .admin-panel button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px 5px 5px 0;
+        }
+        .btn-save { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #fff; }
+        .btn-danger { background: #ff6b6b; color: #fff; }
+        .btn-cancel { background: #666; color: #fff; }
+        
+        .password-list-admin {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        .pwd-admin-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .pwd-admin-item .info { flex: 1; }
+        .pwd-admin-item .info strong { color: #00d4ff; }
+        .pwd-admin-item .info small { color: #888; display: block; margin-top: 5px; }
+        .pwd-admin-item .actions button {
+            padding: 8px 15px;
+            font-size: 12px;
+        }
+        .remaining { color: #00ff88; }
+        .expired { color: #ff6b6b; }
         
         /* 主界面 */
-        .main-section { display: none; }
+        .main-content { display: none; }
+        .main-content.show { display: block; }
         
-        /* 用户信息栏 */
-        .user-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: rgba(255,255,255,0.1); border-radius: 15px; margin-bottom: 25px; }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .user-avatar { width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5em; }
-        .avatar-public { background: linear-gradient(135deg, #00d4ff, #0099cc); }
-        .avatar-admin { background: linear-gradient(135deg, #ff6b6b, #ee5a5a); }
-        .user-name { font-weight: bold; font-size: 1.1em; }
-        .remaining-uses { color: #ffd700; font-size: 0.95em; }
-        .remaining-uses.low { color: #ff6b6b; }
-        .user-actions { display: flex; gap: 10px; }
-        .user-actions button { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
-        .btn-sync { background: #4CAF50; color: #fff; }
-        .btn-sync:hover { background: #45a049; }
-        .btn-logout { background: #666; color: #fff; }
-        .btn-logout:hover { background: #555; }
-        
-        /* 网格布局 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
-        
-        /* 卡片 */
-        .card { background: rgba(255,255,255,0.08); border-radius: 20px; padding: 25px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .card h3 { color: #00d4ff; margin-bottom: 20px; font-size: 1.3em; display: flex; align-items: center; gap: 10px; }
-        .card h3::before { content: ''; width: 4px; height: 25px; background: #00d4ff; border-radius: 2px; }
-        
-        /* 表单 */
-        .form-group { margin-bottom: 18px; }
-        .form-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #ccc; font-size: 0.95em; }
-        .param-badge { background: rgba(0,212,255,0.2); color: #00d4ff; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; font-family: monospace; }
-        .param-desc { color: #888; font-size: 0.85em; margin-left: 20px; margin-top: -5px; margin-bottom: 8px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px 15px; border: 2px solid rgba(255,255,255,0.15); border-radius: 10px; background: rgba(0,0,0,0.3); color: #fff; font-size: 1em; transition: border-color 0.3s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #00d4ff; }
-        
-        /* 按钮 */
-        .btn-calculate { width: 100%; padding: 18px; background: linear-gradient(135deg, #00d4ff, #0099cc); border: none; border-radius: 12px; color: #fff; font-size: 1.2em; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
-        .btn-calculate:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,212,255,0.4); }
-        .btn-reset { width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; font-size: 1em; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
-        .btn-reset:hover { background: rgba(255,255,255,0.2); }
-        
-        /* 结果显示 */
-        .result-box { background: rgba(0,0,0,0.3); border-radius: 15px; padding: 20px; margin-top: 15px; border-left: 4px solid #00d4ff; }
-        .result-box h4 { color: #00d4ff; margin-bottom: 15px; font-size: 1.1em; }
-        .result-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .result-item:last-child { border-bottom: none; }
-        .result-label { color: #aaa; }
-        .result-value { color: #fff; font-weight: bold; font-family: monospace; }
-        .result-highlight { color: #ffd700; font-size: 1.2em; }
-        
-        /* 管理页面 */
-        .admin-section { display: none; }
-        .admin-panel { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 30px; margin-top: 20px; }
-        .admin-panel h3 { color: #ff6b6b; margin-bottom: 25px; font-size: 1.5em; display: flex; align-items: center; gap: 10px; }
-        
-        /* 密码列表 */
-        .password-list { margin: 20px 0; }
-        .password-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; margin-bottom: 10px; border-left: 3px solid #00d4ff; }
-        .password-info { display: flex; align-items: center; gap: 20px; }
-        .password-value { font-family: monospace; font-size: 1.1em; color: #fff; }
-        .password-uses { color: #ffd700; font-size: 0.9em; }
-        .password-actions { display: flex; gap: 10px; }
-        .btn-delete { padding: 8px 15px; background: #ff4757; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 0.9em; }
-        .btn-delete:hover { background: #ff3344; }
-        .btn-reset-uses { padding: 8px 15px; background: #ffa502; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-size: 0.9em; }
-        .btn-reset-uses:hover { background: #ff9500; }
-        
-        /* 添加密码表单 */
-        .add-password-form { display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
-        .add-password-form input { flex: 1; min-width: 150px; }
-        .btn-add { padding: 12px 25px; background: #2ed573; border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; font-size: 1em; }
-        .btn-add:hover { background: #26c064; }
-        
-        /* 修改管理密码 */
-        .admin-password-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .admin-password-form { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; }
-        .admin-password-form input { flex: 1; min-width: 200px; }
-        .btn-change-admin { padding: 12px 25px; background: #ff6b6b; border: none; border-radius: 10px; color: #fff; font-weight: bold; cursor: pointer; }
-        .btn-change-admin:hover { background: #ff5252; }
-        
-        /* Toast 提示 */
-        .toast { position: fixed; top: 20px; right: 20px; padding: 15px 25px; border-radius: 10px; color: #fff; font-weight: bold; z-index: 1000; transform: translateX(400px); transition: transform 0.3s; }
-        .toast.show { transform: translateX(0); }
-        .toast-success { background: #2ed573; }
-        .toast-error { background: #ff4757; }
-        .toast-info { background: #00d4ff; }
-        
-        /* 同步状态 */
-        .sync-status { margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 10px; font-size: 0.9em; }
-        .sync-status .sync-time { color: #888; }
-        .sync-status .sync-data { color: #00d4ff; margin-top: 5px; font-family: monospace; font-size: 0.85em; word-break: break-all; }
-        
-        /* 模态框 */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .modal.show { display: flex; }
-        .modal-content { background: rgba(30,30,50,0.95); border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
-        .modal h3 { color: #00d4ff; margin-bottom: 20px; }
-        .modal-buttons { display: flex; gap: 15px; margin-top: 25px; justify-content: flex-end; }
-        .modal-btn { padding: 12px 25px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .modal-btn-cancel { background: #666; color: #fff; }
-        .modal-btn-confirm { background: #00d4ff; color: #fff; }
-        
-        /* 响应式 */
-        @media (max-width: 768px) {
-            .header h1 { font-size: 1.8em; }
-            .login-box { width: 95%; padding: 25px; }
-            .grid { grid-template-columns: 1fr; }
-            .user-bar { flex-direction: column; gap: 15px; text-align: center; }
-            .add-password-form { flex-direction: column; }
-            .admin-password-form { flex-direction: column; }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0,212,255,0.3);
         }
+        .header h1 { color: #00d4ff; font-size: 1.4rem; text-shadow: 0 0 10px rgba(0,212,255,0.5); }
+        .header h2 { color: #fff; font-size: 1.2rem; margin-top: 5px; font-weight: normal; }
+        
+        .user-bar {
+            background: rgba(0,212,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-bar button {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .creator { text-align: right; color: #ff6666; font-size: 0.75rem; margin-top: 30px; }
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #00d4ff;
+            padding-bottom: 10px;
+        }
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .input-group { display: flex; flex-direction: column; }
+        .input-group label { margin-bottom: 8px; color: #ccc; font-size: 0.95rem; }
+        .input-group input {
+            padding: 12px 15px;
+            border: 2px solid rgba(0,212,255,0.3);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+        }
+        .input-group input:focus { outline: none; border-color: #00d4ff; }
+        .input-group .unit { color: #888; font-size: 0.85rem; margin-top: 5px; }
+        .btn {
+            background: linear-gradient(135deg, #00d4ff, #0099cc);
+            color: #fff;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,212,255,0.4); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px 8px; text-align: center; border: 1px solid rgba(255,255,255,0.2); }
+        th { background: rgba(0,212,255,0.3); font-weight: 600; font-size: 0.85rem; }
+        td { background: rgba(255,255,255,0.05); font-size: 0.9rem; }
+        .result-highlight { color: #00ff88; font-weight: bold; }
+        .negative { color: #ff4444 !important; font-weight: bold; }
+        .formula-note {
+            background: rgba(255,193,7,0.2);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .formula-note p { margin: 5px 0; font-size: 0.9rem; color: #ffc107; }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: rgba(0,212,255,0.1);
+            border-radius: 8px;
+            margin: 5px 0;
+        }
+        .table-wrapper { overflow-x: auto; margin-top: 15px; }
+        .table-wrapper table { min-width: 800px; }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,212,255,0.9);
+            color: #1a1a2e;
+            padding: 15px 30px;
+            border-radius: 10px;
+            display: none;
+            z-index: 1000;
+        }
+        .toast.show { display: block; }
+        .toast.error { background: rgba(255,107,107,0.9); color: #fff; }
+        
+        /* 加载 */
+        .loading { display: none; text-align: center; padding: 40px; }
+        .loading.show { display: block; }
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- 登录页面 -->
-        <div class="login-section" id="loginSection">
-            <div class="login-box">
-                <h2>🔐 登录验证</h2>
-                <input type="password" id="loginPassword" placeholder="请输入公用密码" onkeypress="if(event.key==='Enter')login('public')">
-                <button class="btn-public" onclick="login('public')">公用登录</button>
-                <button class="btn-admin" onclick="login('admin')">管理账户</button>
-                <p class="login-error" id="loginError"></p>
-                <p class="login-hint">公用密码用于计算，管理密码可管理密码设置</p>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px;">加载中...</p>
+        </div>
+        
+        <!-- 登录界面 -->
+        <div class="login-screen" id="loginScreen">
+            <h2>🔐 账户登录</h2>
+            <div class="login-tabs">
+                <button class="active" onclick="switchTab('public')">公用账户</button>
+                <button onclick="switchTab('admin')">管理账户</button>
             </div>
+            
+            <!-- 公用账户 -->
+            <div id="publicLogin">
+                <div class="pwd-list" id="pwdList">
+                    <!-- 动态显示可用密码 -->
+                </div>
+                <input type="password" id="password" placeholder="选择或输入密码">
+                <div class="error-msg" id="errorMsg">密码错误或已用完</div>
+                <button class="btn-public" onclick="loginPublic()">登录</button>
+            </div>
+            
+            <!-- 管理账户 -->
+            <div id="adminLogin" style="display:none;">
+                <input type="password" id="adminPassword" placeholder="管理密码">
+                <div class="error-msg" id="adminErrorMsg">密码错误</div>
+                <button class="btn-admin" onclick="loginAdmin()">进入管理</button>
+            </div>
+        </div>
+        
+        <!-- 试用限制弹窗 -->
+        <div class="trial-modal" id="trialModal">
+            <div class="trial-modal-content">
+                <h3>⚠️ 该密码已用完</h3>
+                <p>此密码的试用次数已用完。<br><br>如需继续使用，请联系：</p>
+                <p style="color: #00d4ff; font-size: 18px; font-weight: bold;">
+                    四川交建智能装备分公司<br>常彬
+                </p>
+                <button onclick="closeTrialModal()">我知道了</button>
+            </div>
+        </div>
+        
+        <!-- 管理面板 -->
+        <div class="admin-panel" id="adminPanel">
+            <h2>⚙️ 密码管理</h2>
+            
+            <h3>➕ 添加新密码</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>密码</label>
+                    <input type="text" id="newPwd" placeholder="输入密码">
+                </div>
+                <div class="input-group">
+                    <label>可用次数</label>
+                    <input type="number" id="newPwdUses" value="10" min="1">
+                </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <button class="btn-save" onclick="addPassword()">➕ 添加密码</button>
+                <button class="btn-cancel" onclick="logout()">返回</button>
+            </div>
+            
+            <h3>📋 当前密码列表</h3>
+            <div class="password-list-admin" id="pwdListAdmin">
+                <!-- 动态生成 -->
+            </div>
+            
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+            <h3>🔐 修改管理密码</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>新管理密码</label>
+                    <input type="text" id="newAdminPwd" placeholder="输入新管理密码">
+                </div>
+                <div class="input-group">
+                    <label>确认密码</label>
+                    <input type="text" id="confirmAdminPwd" placeholder="确认新密码">
+                </div>
+            </div>
+            <button class="btn-save" onclick="updateAdminPassword()" style="margin-top: 10px;">保存管理密码</button>
+            
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
+            <h3>☁️ 云端同步</h3>
+            <p style="color: #888; font-size: 14px; margin-bottom: 15px;">
+                说明：点击下方按钮，我会帮你把数据上传到云端。<br>
+                <span style="color: #ff6b6b;">（由于技术限制，需要我帮你操作）</span>
+            </p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-save" onclick="exportData()" style="flex: 1;">📤 导出数据</button>
+                <button class="btn-save" onclick="confirmUpload()" style="flex: 1; background: #4CAF50;">☁️ 上传数据</button>
+            </div>
+            <p style="color: #666; font-size: 12px; margin-top: 10px;" id="syncStatus">同步状态：本地数据</p>
         </div>
         
         <!-- 主界面 -->
-        <div class="main-section" id="mainSection">
+        <div class="main-content" id="mainContent">
             <div class="header">
-                <h1>🚇 隧道进尺角度计算器</h1>
-                <p>适用于新奥法光面爆破钻孔参数计算</p>
+                <h1>四川交建智能装备分公司</h1>
+                <h2>三臂凿岩台车开挖角度计算器</h2>
             </div>
             
-            <!-- 用户信息栏 -->
             <div class="user-bar">
-                <div class="user-info">
-                    <div class="user-avatar" id="userAvatar">👤</div>
-                    <div>
-                        <div class="user-name" id="userName">公用用户</div>
-                        <div class="remaining-uses" id="remainingUses">剩余次数：--</div>
+                <span id="userStatus">📱 公用账户</span>
+                <button onclick="logout()">退出登录</button>
+            </div>
+            
+            <div class="card">
+                <h2>📐 基本参数</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>开挖进尺 (b)</label>
+                        <input type="number" id="b" value="4" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>推进梁长度 (c')</label>
+                        <input type="number" id="c" value="7.2" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>隧道宽度</label>
+                        <input type="number" id="width" value="16.35" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>布眼间距增加值</label>
+                        <input type="number" id="stepA" value="0.7" step="0.01" onchange="calculate()">
+                        <span class="unit">每级增加布眼距离（米）</span>
+                    </div>
+                    <div class="input-group">
+                        <label>孔底位置增加值</label>
+                        <input type="number" id="stepD" value="1.2" step="0.01" onchange="calculate()">
+                        <span class="unit">每级增加孔底位置（米）</span>
                     </div>
                 </div>
-                <div class="user-actions">
-                    <button class="btn-sync" onclick="showSyncModal()">☁️ 同步数据</button>
-                    <button class="btn-logout" onclick="logout()">退出登录</button>
+                <div class="formula-note">
+                    <p>📌 半幅活动宽度 L = 隧道宽度 ÷ 2 = <span id="L_auto">8.175</span> 米</p>
+                </div>
+                <button class="btn" onclick="calculate()">🧮 计算</button>
+            </div>
+            
+            <div class="card">
+                <h2>📍 各掏槽布眼距离与孔底位置</h2>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label>第一掏槽 - 布眼距离 (a₁)</label>
+                        <input type="number" id="a1" value="3.3" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                    <div class="input-group">
+                        <label>第一掏槽 - 孔底位置 (d₁)</label>
+                        <input type="number" id="d1" value="0.25" step="0.01" onchange="calculate()">
+                        <span class="unit">单位：米</span>
+                    </div>
+                </div>
+                <div class="formula-note">
+                    <p>📌 第二掏槽：布眼距离 = a₁ + <span id="stepA_val">0.7</span>，孔底位置 = d₁ + <span id="stepD_val">1.2</span></p>
+                    <p>📌 第三掏槽 = 第二掏槽 + 步长，以此类推...</p>
                 </div>
             </div>
             
-            <!-- 计算区域 -->
-            <div class="grid">
-                <!-- 基础参数卡片 -->
-                <div class="card">
-                    <h3>基础参数</h3>
-                    <div class="form-group">
-                        <label><span class="param-badge">b</span> 开挖进尺</label>
-                        <p class="param-desc">每次爆破开挖的深度（米）</p>
-                        <input type="number" id="b" value="3.4" step="0.1" min="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label><span class="param-badge">c'</span> 推进梁长度</label>
-                        <p class="param-desc">凿岩台车推进梁的总长度（米）</p>
-                        <input type="number" id="c" value="4.3" step="0.1" min="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label><span class="param-badge">L</span> 半幅活动宽度</label>
-                        <p class="param-desc">L = 隧道宽度 ÷ 2（米）</p>
-                        <input type="number" id="L" value="5.5" step="0.1" min="0.1">
-                    </div>
+            <div class="card" id="resultCard">
+                <h2>📊 计算结果</h2>
+                <div class="info-row">
+                    <span>半幅活动宽度 (L)</span>
+                    <span id="res_L">-</span>
                 </div>
-                
-                <!-- 各掏槽与布眼位置卡片 -->
-                <div class="card">
-                    <h3>各掏槽与布眼位置</h3>
-                    <div class="form-group">
-                        <label><span class="param-badge">a</span> 布眼距离</label>
-                        <p class="param-desc">掏槽眼到掌子面的距离（米）</p>
-                        <input type="number" id="a" value="4.0" step="0.1" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label><span class="param-badge">d</span> 孔底位置</label>
-                        <p class="param-desc">孔底超出掌子面的距离（米）</p>
-                        <input type="number" id="d" value="0.5" step="0.1" min="0">
-                    </div>
-                    <div class="form-group">
-                        <label><span class="param-badge">a'</span> 剩余底边（台车）</label>
-                        <p class="param-desc">台车所需活动空间（米）</p>
-                        <input type="number" id="a2" value="0.5" step="0.1" min="0">
-                    </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>名称</th>
+                                <th>布眼距离(a)</th>
+                                <th>孔底位置(d)</th>
+                                <th>相对底边(e)</th>
+                                <th>开挖深度(c)</th>
+                                <th>开挖角度(∠B)</th>
+                                <th class="result-highlight">台车输入(∠A')</th>
+                                <th>剩余底边(a')</th>
+                                <th>共需空间</th>
+                                <th>剩余位置</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultTable"></tbody>
+                    </table>
                 </div>
-                
-                <!-- 计算结果卡片 -->
-                <div class="card" style="grid-column: span 2;">
-                    <h3>计算结果</h3>
-                    <div class="grid">
-                        <div class="result-box">
-                            <h4>📐 掏槽眼参数</h4>
-                            <div class="result-item">
-                                <span class="result-label">e (相对底边)</span>
-                                <span class="result-value" id="result_e">-- m</span>
-                            </div>
-                            <div class="result-item">
-                                <span class="result-label">c (开挖深度)</span>
-                                <span class="result-value" id="result_c">-- m</span>
-                            </div>
-                            <div class="result-item">
-                                <span class="result-label">∠A' (台车输入角度)</span>
-                                <span class="result-value result-highlight" id="result_angleA">-- °</span>
-                            </div>
-                        </div>
-                        <div class="result-box">
-                            <h4>📐 辅助眼参数</h4>
-                            <div class="result-item">
-                                <span class="result-label">f (相对底边)</span>
-                                <span class="result-value" id="result_f">-- m</span>
-                            </div>
-                            <div class="result-item">
-                                <span class="result-label">∠A'' (台车输入角度)</span>
-                                <span class="result-value result-highlight" id="result_angleB">-- °</span>
-                            </div>
-                            <div class="result-item">
-                                <span class="result-label">可布眼最大间距</span>
-                                <span class="result-value" id="result_g">-- m</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="btn-calculate" onclick="calculate()">开始计算</button>
-                    <button class="btn-reset" onclick="resetForm()">重置参数</button>
+                <div class="formula-note" style="font-size:0.8rem;">
+                    <p><strong>📐 台车输入角度 ∠A' = ATAN(e/b)</strong></p>
+                    <p>简化：e=相对底边，b=开挖进尺，L=半幅宽度</p>
                 </div>
             </div>
-        </div>
-        
-        <!-- 管理页面 -->
-        <div class="admin-section" id="adminSection">
-            <div class="header">
-                <h1 style="color: #ff6b6b;">⚙️ 管理系统</h1>
-                <p>密码管理与系统设置</p>
-            </div>
-            
-            <div class="admin-panel">
-                <h3>🔑 公用密码管理</h3>
-                
-                <div class="password-list" id="passwordList">
-                    <!-- 密码列表动态生成 -->
-                </div>
-                
-                <div class="add-password-form">
-                    <input type="password" id="newPassword" placeholder="输入新密码">
-                    <input type="number" id="newPasswordUses" value="10" min="1" placeholder="使用次数">
-                    <button class="btn-add" onclick="addPassword()">✅ 确认添加</button>
-                </div>
-                
-                <div class="admin-password-section">
-                    <h3 style="font-size: 1.2em;">🔐 修改管理密码</h3>
-                    <div class="admin-password-form">
-                        <input type="password" id="currentAdminPassword" placeholder="当前管理密码">
-                        <input type="password" id="newAdminPassword" placeholder="新管理密码">
-                        <button class="btn-change-admin" onclick="changeAdminPassword()">确认修改</button>
-                    </div>
-                </div>
-                
-                <div class="sync-status" id="adminSyncStatus">
-                    <div>☁️ 数据同步状态</div>
-                    <div class="sync-time" id="syncTime">上次同步：--</div>
-                    <div class="sync-data" id="syncData">本地数据：未加载</div>
-                </div>
-                
-                <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="btn-sync" onclick="uploadToCloud()" style="flex: 1;">☁️ 一键上传到云端</button>
-                    <button class="btn-sync" onclick="downloadFromCloud()" style="flex: 1; background: #2196F3;">📥 从云端下载</button>
-                </div>
-                
-                <button class="btn-logout" onclick="logout()" style="width: 100%; margin-top: 20px;">退出管理</button>
-            </div>
+            <div class="creator">制作人：常彬</div>
         </div>
     </div>
     
-    <!-- 同步确认模态框 -->
-    <div class="modal" id="syncModal">
-        <div class="modal-content">
-            <h3>☁️ 同步数据</h3>
-            <p id="syncModalText">请选择同步方式：</p>
-            <div style="margin-top: 20px;">
-                <button class="btn-sync" onclick="uploadToCloud(); closeModal();" style="width: 100%; margin-bottom: 10px;">☁️ 上传到云端</button>
-                <button class="btn-sync" onclick="downloadFromCloud(); closeModal();" style="width: 100%; background: #2196F3; margin-bottom: 10px;">📥 从云端下载</button>
-                <button class="btn-logout" onclick="closeModal()" style="width: 100%;">取消</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Toast -->
     <div class="toast" id="toast"></div>
-
+    
     <script>
-        // ============ 配置区域 ============
-        const CONFIG = {
-            GITHUB_TOKEN: 'ghp_qY5xI2kL8mN3pR4tU6vW9yZ1aB0cD3eF7gH4jK',  // GitHub Token
-            GITHUB_REPO: 'changbin168/tunnel-drill-calculator',  // 仓库名
-            GITHUB_BRANCH: 'main',
-            GITHUB_FILE_PATH: 'app_data.json',  // 文件路径
-            CLOUD_URL: 'https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/app_data.json',
-            DEFAULT_DATA: {
-                adminPassword: 'admin2026',
-                publicPasswords: [
-                    { password: 'Cb17612833821.', uses: 10, used: 0 },
-                    { password: '456', uses: 5, used: 0 }
-                ]
-            }
+        // ====== 状态 ======
+        let state = {
+            loginType: 'public',
+            isLoggedIn: false,
+            isAdmin: false,
+            usedPassword: '',
+            passwords: [
+                { pwd: 'Cb17612833821.', uses: 10, used: 0 },
+                { pwd: '456', uses: 5, used: 0 }
+            ],
+            adminPassword: 'admin2026',
+            deviceId: localStorage.getItem('tunnel_device_id') || ''
         };
-
-        // ============ 状态管理 ============
-        let appData = JSON.parse(JSON.stringify(CONFIG.DEFAULT_DATA));
-        let currentUser = null;
-
-        // ============ 初始化 ============
-        function init() {
-            // 先尝试从本地存储加载
-            const savedData = localStorage.getItem('tunnelAppData');
-            if (savedData) {
+        
+        // ====== 本地存储 ======
+        function saveState() {
+            const saveData = {
+                passwords: state.passwords,
+                adminPassword: state.adminPassword
+            };
+            localStorage.setItem('tunnel_app_data', JSON.stringify(saveData));
+            updateSyncStatus('已保存到本地');
+        }
+        
+        function loadState() {
+            const saved = localStorage.getItem('tunnel_app_data');
+            if (saved) {
                 try {
-                    appData = JSON.parse(savedData);
+                    const data = JSON.parse(saved);
+                    if (data.passwords) state.passwords = data.passwords;
+                    if (data.adminPassword) state.adminPassword = data.adminPassword;
+                    updateSyncStatus('已加载本地数据');
                 } catch (e) {
-                    console.error('本地数据解析失败，使用默认数据');
-                }
-            }
-            
-            // 显示主界面（先不让登录）
-            // document.getElementById('loginSection').style.display = 'flex';
-        }
-
-        // ============ 登录相关 ============
-        function login(type) {
-            const password = document.getElementById('loginPassword').value;
-            const errorEl = document.getElementById('loginError');
-            
-            if (type === 'admin') {
-                if (password === appData.adminPassword) {
-                    currentUser = { type: 'admin' };
-                    showAdminPanel();
-                } else {
-                    errorEl.textContent = '管理密码错误！';
-                    errorEl.style.display = 'block';
-                }
-            } else {
-                const pwdEntry = appData.publicPasswords.find(p => p.password === password);
-                if (pwdEntry) {
-                    if (pwdEntry.used < pwdEntry.uses) {
-                        currentUser = { type: 'public', password: password, entry: pwdEntry };
-                        pwdEntry.used++;
-                        saveData();
-                        showMainPanel();
-                    } else {
-                        errorEl.textContent = '此密码已用完次数！';
-                        errorEl.style.display = 'block';
-                    }
-                } else {
-                    errorEl.textContent = '密码错误！';
-                    errorEl.style.display = 'block';
+                    console.error('加载数据失败', e);
                 }
             }
         }
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('loginSection').style.display = 'flex';
-            document.getElementById('mainSection').style.display = 'none';
-            document.getElementById('adminSection').style.display = 'none';
-            document.getElementById('loginPassword').value = '';
-            document.getElementById('loginError').style.display = 'none';
+        
+        function updateSyncStatus(msg) {
+            const el = document.getElementById('syncStatus');
+            if (el) el.textContent = '同步状态：' + msg;
         }
-
-        // ============ 界面切换 ============
-        function showMainPanel() {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('mainSection').style.display = 'block';
-            document.getElementById('adminSection').style.display = 'none';
-            
-            // 更新用户信息
-            document.getElementById('userAvatar').className = 'user-avatar avatar-public';
-            document.getElementById('userAvatar').textContent = '👤';
-            document.getElementById('userName').textContent = '公用用户';
-            
-            const remaining = currentUser.entry.uses - currentUser.entry.used;
-            document.getElementById('remainingUses').textContent = `剩余次数：${remaining}`;
-            document.getElementById('remainingUses').className = remaining <= 2 ? 'remaining-uses low' : 'remaining-uses';
-            
-            updateSyncStatus();
+        
+        function exportData() {
+            const data = {
+                passwords: state.passwords,
+                adminPassword: state.adminPassword
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'tunnel_app_data.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('数据已导出，请在聊天窗口发送给我上传');
         }
-
-        function showAdminPanel() {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('mainSection').style.display = 'none';
-            document.getElementById('adminSection').style.display = 'block';
-            
-            renderPasswordList();
-            updateSyncStatus();
+        
+        function confirmUpload() {
+            const data = {
+                passwords: state.passwords,
+                adminPassword: state.adminPassword
+            };
+            const jsonStr = JSON.stringify(data, null, 2);
+            showToast('请复制以下数据，发送给我帮你上传：', true);
+            console.log('=== 上传数据 ===');
+            console.log(jsonStr);
+            console.log('=== 复制结束 ===');
+            // 复制到剪贴板
+            navigator.clipboard.writeText(jsonStr).then(() => {
+                showToast('数据已复制，请发送给我！');
+            }).catch(() => {
+                showToast('请在控制台查看数据', true);
+            });
         }
-
-        // ============ 密码管理 ============
+        
+        // ====== 工具函数 ======
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'show' + (isError ? ' error' : '');
+            setTimeout(() => toast.className = 'toast', 3000);
+        }
+        
+        function showLoading(show = true) {
+            document.getElementById('loading').className = show ? 'loading show' : 'loading';
+        }
+        
+        // ====== 登录相关 ======
+        function switchTab(type) {
+            state.loginType = type;
+            document.querySelectorAll('.login-tabs button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('publicLogin').style.display = type === 'public' ? 'block' : 'none';
+            document.getElementById('adminLogin').style.display = type === 'admin' ? 'block' : 'none';
+            document.getElementById('errorMsg').style.display = 'none';
+            document.getElementById('adminErrorMsg').style.display = 'none';
+            
+            if (type === 'public') {
+                renderPasswordList();
+            }
+        }
+        
         function renderPasswordList() {
-            const list = document.getElementById('passwordList');
-            if (appData.publicPasswords.length === 0) {
-                list.innerHTML = '<p style="color: #888; text-align: center;">暂无密码</p>';
+            const list = document.getElementById('pwdList');
+            const available = state.passwords.filter(p => p.used < p.uses);
+            const expired = state.passwords.filter(p => p.used >= p.uses);
+            
+            let html = '';
+            
+            if (available.length > 0) {
+                html += '<p style="color:#888;margin-bottom:10px;">可用密码：</p>';
+                available.forEach(p => {
+                    const remaining = p.uses - p.used;
+                    html += `<div class="pwd-item">
+                        <span>${p.pwd}</span>
+                        <span class="uses">剩余 ${remaining}/${p.uses} 次</span>
+                    </div>`;
+                });
+            }
+            
+            if (expired.length > 0) {
+                html += '<p style="color:#ff6b6b;margin:15px 0 10px 0;">已用完：</p>';
+                expired.forEach(p => {
+                    html += `<div class="pwd-item" style="opacity:0.5;">
+                        <span>${p.pwd}</span>
+                        <span style="color:#ff6b6b;">已用完</span>
+                    </div>`;
+                });
+            }
+            
+            if (state.passwords.length === 0) {
+                html = '<p style="color:#888;text-align:center;">暂无可用密码</p>';
+            }
+            
+            list.innerHTML = html;
+        }
+        
+        function loginPublic() {
+            const password = document.getElementById('password').value;
+            
+            // 查找密码
+            const pwdObj = state.passwords.find(p => p.pwd === password);
+            
+            if (!pwdObj) {
+                document.getElementById('errorMsg').textContent = '密码错误';
+                document.getElementById('errorMsg').style.display = 'block';
                 return;
             }
             
-            list.innerHTML = appData.publicPasswords.map((p, i) => `
-                <div class="password-item">
-                    <div class="password-info">
-                        <span class="password-value">${'●'.repeat(p.password.length)}</span>
-                        <span class="password-uses">${p.used}/${p.uses}次</span>
+            if (pwdObj.used >= pwdObj.uses) {
+                document.getElementById('trialModal').classList.add('show');
+                return;
+            }
+            
+            // 使用密码
+            pwdObj.used++;
+            state.usedPassword = password;
+            
+            showToast(`登录成功！密码 "${password}" 剩余 ${pwdObj.uses - pwdObj.used} 次`);
+            showMain();
+        }
+        
+        function loginAdmin() {
+            const password = document.getElementById('adminPassword').value;
+            
+            if (password !== state.adminPassword) {
+                document.getElementById('adminErrorMsg').style.display = 'block';
+                return;
+            }
+            
+            showAdmin();
+        }
+        
+        function showMain() {
+            state.isLoggedIn = true;
+            state.isAdmin = false;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').classList.remove('show');
+            document.getElementById('mainContent').classList.add('show');
+            document.getElementById('userStatus').textContent = `📱 公用账户 | 密码 ${state.usedPassword} | 剩余 ${getRemainingUses(state.usedPassword)} 次`;
+            calculate();
+        }
+        
+        function showAdmin() {
+            state.isLoggedIn = true;
+            state.isAdmin = true;
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').classList.remove('show');
+            document.getElementById('adminPanel').classList.add('show');
+            renderAdminPasswordList();
+        }
+        
+        function getRemainingUses(pwd) {
+            const pwdObj = state.passwords.find(p => p.pwd === pwd);
+            if (!pwdObj) return 0;
+            return pwdObj.uses - pwdObj.used;
+        }
+        
+        function logout() {
+            state.isLoggedIn = false;
+            state.isAdmin = false;
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('adminPanel').classList.remove('show');
+            document.getElementById('mainContent').classList.remove('show');
+            document.getElementById('password').value = '';
+            document.getElementById('adminPassword').value = '';
+            renderPasswordList();
+        }
+        
+        function closeTrialModal() {
+            document.getElementById('trialModal').classList.remove('show');
+        }
+        
+        // ====== 管理功能 ======
+        function addPassword() {
+            const pwd = document.getElementById('newPwd').value.trim();
+            const uses = parseInt(document.getElementById('newPwdUses').value) || 10;
+            
+            if (!pwd) {
+                showToast('请输入密码', true);
+                return;
+            }
+            
+            if (state.passwords.find(p => p.pwd === pwd)) {
+                showToast('该密码已存在', true);
+                return;
+            }
+            
+            state.passwords.push({ pwd, uses, used: 0 });
+            saveState(); // 自动保存到本地
+            showToast(`密码 "${pwd}" 添加成功，可用 ${uses} 次`);
+            
+            document.getElementById('newPwd').value = '';
+            document.getElementById('newPwdUses').value = '10';
+            renderAdminPasswordList();
+        }
+        
+        function deletePassword(pwd) {
+            state.passwords = state.passwords.filter(p => p.pwd !== pwd);
+            showToast(`密码 "${pwd}" 已删除`);
+            renderAdminPasswordList();
+        }
+        
+        function resetPassword(pwd) {
+            const pwdObj = state.passwords.find(p => p.pwd === pwd);
+            if (pwdObj) {
+                pwdObj.used = 0;
+                showToast(`密码 "${pwd}" 已重置`);
+                renderAdminPasswordList();
+            }
+        }
+        
+        function renderAdminPasswordList() {
+            const list = document.getElementById('pwdListAdmin');
+            
+            if (state.passwords.length === 0) {
+                list.innerHTML = '<p style="color:#888;text-align:center;">暂无密码，请添加</p>';
+                return;
+            }
+            
+            list.innerHTML = state.passwords.map(p => {
+                const remaining = p.uses - p.used;
+                const isExpired = remaining <= 0;
+                return `<div class="pwd-admin-item">
+                    <div class="info">
+                        <strong>${p.pwd}</strong>
+                        <small class="${isExpired ? 'expired' : 'remaining'}">
+                            ${isExpired ? '已用完' : `剩余 ${remaining}/${p.uses} 次`}
+                        </small>
                     </div>
-                    <div class="password-actions">
-                        <button class="btn-reset-uses" onclick="resetPasswordUses(${i})">重置</button>
-                        <button class="btn-delete" onclick="deletePassword(${i})">删除</button>
+                    <div class="actions">
+                        <button class="btn-save" onclick="resetPassword('${p.pwd}')">重置</button>
+                        <button class="btn-danger" onclick="deletePassword('${p.pwd}')">删除</button>
                     </div>
-                </div>
+                </div>`;
+            }).join('');
+        }
+        
+        function updateAdminPassword() {
+            const newPwd = document.getElementById('newAdminPwd').value.trim();
+            const confirmPwd = document.getElementById('confirmAdminPwd').value.trim();
+            
+            if (!newPwd || newPwd.length < 4) {
+                showToast('管理密码至少4位', true);
+                return;
+            }
+            
+            if (newPwd !== confirmPwd) {
+                showToast('两次密码不一致', true);
+                return;
+            }
+            
+            state.adminPassword = newPwd;
+            showToast('管理密码已更新');
+            document.getElementById('newAdminPwd').value = '';
+            document.getElementById('confirmAdminPwd').value = '';
+        }
+        
+        // ====== v2计算逻辑 ======
+        function updateL() {
+            const width = parseFloat(document.getElementById('width').value) || 0;
+            document.getElementById('L_auto').textContent = (width / 2).toFixed(2);
+        }
+        
+        function calculate() {
+            const b = parseFloat(document.getElementById('b').value);
+            const c = parseFloat(document.getElementById('c').value);
+            const width = parseFloat(document.getElementById('width').value);
+            const L = width / 2;
+            const stepA = parseFloat(document.getElementById('stepA').value);
+            const stepD = parseFloat(document.getElementById('stepD').value);
+            const a1 = parseFloat(document.getElementById('a1').value);
+            const d1 = parseFloat(document.getElementById('d1').value);
+            
+            document.getElementById('res_L').textContent = L.toFixed(2) + ' 米';
+            
+            const names = ['第一掏槽', '第二掏槽', '第三掏槽', '第四掏槽', '第五掏槽'];
+            const rows = [];
+            
+            for (let i = 0; i < 5; i++) {
+                const a = a1 + i * stepA;
+                const d = d1 + i * stepD;
+                const e = a - d;
+                const c_depth = Math.sqrt(b * b + e * e);
+                const angleB = Math.atan(b / e) * 180 / Math.PI;
+                const angleA = Math.atan(e / b) * 180 / Math.PI;
+                const a_prime = c * Math.cos(Math.atan(b / e));
+                const space = a_prime + a;
+                const remain = L - space;
+                
+                rows.push({
+                    name: names[i], a: a.toFixed(2), d: d.toFixed(2), e: e.toFixed(2),
+                    c: c_depth.toFixed(2), angleB: angleB.toFixed(2), angleA: angleA.toFixed(2),
+                    a_prime: a_prime.toFixed(2), space: space.toFixed(2), remain: remain.toFixed(2)
+                });
+            }
+            
+            const tbody = document.getElementById('resultTable');
+            tbody.innerHTML = rows.map(row => `
+                <tr>
+                    <td>${row.name}</td>
+                    <td class="${parseFloat(row.a) < 0 ? 'negative' : ''}">${row.a}</td>
+                    <td class="${parseFloat(row.d) < 0 ? 'negative' : ''}">${row.d}</td>
+                    <td class="${parseFloat(row.e) < 0 ? 'negative' : ''}">${row.e}</td>
+                    <td class="${parseFloat(row.c) < 0 ? 'negative' : ''}">${row.c}</td>
+                    <td class="${parseFloat(row.angleB) < 0 ? 'negative' : ''}">${row.angleB}°</td>
+                    <td class="result-highlight ${parseFloat(row.angleA) < 0 ? 'negative' : ''}">${row.angleA}°</td>
+                    <td class="${parseFloat(row.a_prime) < 0 ? 'negative' : ''}">${row.a_prime}</td>
+                    <td class="${parseFloat(row.space) < 0 ? 'negative' : ''}">${row.space}</td>
+                    <td class="${parseFloat(row.remain) < 0 ? 'negative' : ''}">${row.remain}</td>
+                </tr>
             `).join('');
         }
-
-        function addPassword() {
-            const password = document.getElementById('newPassword').value.trim();
-            const uses = parseInt(document.getElementById('newPasswordUses').value) || 10;
-            
-            if (!password) {
-                showToast('请输入密码！', 'error');
-                return;
+        
+        // ====== 初始化 ======
+        function init() {
+            loadState(); // 加载本地数据
+            if (!state.deviceId) {
+                state.deviceId = 'device_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('tunnel_device_id', state.deviceId);
             }
             
-            if (appData.publicPasswords.find(p => p.password === password)) {
-                showToast('密码已存在！', 'error');
-                return;
-            }
+            document.getElementById('width').addEventListener('input', updateL);
+            document.getElementById('stepA').addEventListener('input', function() {
+                document.getElementById('stepA_val').textContent = this.value;
+            });
+            document.getElementById('stepD').addEventListener('input', function() {
+                document.getElementById('stepD_val').textContent = this.value;
+            });
             
-            appData.publicPasswords.push({ password, uses, used: 0 });
-            saveData();
+            updateL();
             renderPasswordList();
-            
-            document.getElementById('newPassword').value = '';
-            document.getElementById('newPasswordUses').value = '10';
-            
-            showToast('密码添加成功！', 'success');
         }
-
-        function deletePassword(index) {
-            if (confirm('确定删除此密码？')) {
-                appData.publicPasswords.splice(index, 1);
-                saveData();
-                renderPasswordList();
-                showToast('密码已删除', 'success');
-            }
-        }
-
-        function resetPasswordUses(index) {
-            appData.publicPasswords[index].used = 0;
-            saveData();
-            renderPasswordList();
-            showToast('次数已重置', 'success');
-        }
-
-        function changeAdminPassword() {
-            const current = document.getElementById('currentAdminPassword').value;
-            const newPwd = document.getElementById('newAdminPassword').value.trim();
-            
-            if (current !== appData.adminPassword) {
-                showToast('当前密码错误！', 'error');
-                return;
-            }
-            
-            if (!newPwd) {
-                showToast('请输入新密码！', 'error');
-                return;
-            }
-            
-            appData.adminPassword = newPwd;
-            saveData();
-            
-            document.getElementById('currentAdminPassword').value = '';
-            document.getElementById('newAdminPassword').value = '';
-            
-            showToast('管理密码修改成功！', 'success');
-        }
-
-        // ============ 数据持久化 ============
-        function saveData() {
-            localStorage.setItem('tunnelAppData', JSON.stringify(appData));
-            console.log('数据已保存到本地', appData);
-        }
-
-        function resetLocalData() {
-            if (confirm('确定重置本地数据？这将恢复默认密码设置。')) {
-                appData = JSON.parse(JSON.stringify(CONFIG.DEFAULT_DATA));
-                saveData();
-                renderPasswordList();
-                showToast('本地数据已重置', 'success');
-            }
-        }
-
-        // ============ 云端同步 ============
-        async function uploadToCloud() {
-            showToast('正在上传...', 'info');
-            
-            try {
-                const content = btoa(unescape(encodeURIComponent(JSON.stringify(appData, null, 2))));
-                
-                // 先获取文件SHA
-                let sha = null;
-                try {
-                    const getResp = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE_PATH}`, {
-                        headers: { 'Authorization': `token ${CONFIG.GITHUB_TOKEN}` }
-                    });
-                    if (getResp.ok) {
-                        const data = await getResp.json();
-                        sha = data.sha;
-                    }
-                } catch (e) {
-                    console.log('获取SHA失败，将创建新文件');
-                }
-                
-                // 上传文件
-                const body = {
-                    message: 'Update app data',
-                    content: content,
-                    branch: CONFIG.GITHUB_BRANCH
-                };
-                if (sha) body.sha = sha;
-                
-                const resp = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE_PATH}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${CONFIG.GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                
-                if (resp.ok) {
-                    showToast('☁️ 上传成功！', 'success');
-                    localStorage.setItem('tunnelAppLastSync', new Date().toISOString());
-                    updateSyncStatus();
-                } else {
-                    throw new Error('上传失败');
-                }
-            } catch (e) {
-                console.error('上传失败:', e);
-                showToast('上传失败，请检查网络', 'error');
-            }
-        }
-
-        // 转换旧格式数据到新格式
-        function convertLegacyData(content) {
-            const newData = {
-                adminPassword: content.adminPassword || 'admin2026',
-                publicPasswords: []
-            };
-            
-            // 处理旧格式 (passwords) 或新格式 (publicPasswords)
-            const pwdList = content.publicPasswords || content.passwords || [];
-            for (const p of pwdList) {
-                newData.publicPasswords.push({
-                    password: p.password || p.pwd || '',
-                    uses: p.uses || 10,
-                    used: p.used || 0
-                });
-            }
-            
-            return newData;
-        }
-
-        async function downloadFromCloud() {
-            showToast('正在下载...', 'info');
-            
-            try {
-                const resp = await fetch(`https://api.github.com/repos/${CONFIG.GITHUB_REPO}/contents/${CONFIG.GITHUB_FILE_PATH}`, {
-                    headers: { 'Authorization': `token ${CONFIG.GITHUB_TOKEN}` }
-                });
-                
-                if (!resp.ok) throw new Error('获取失败');
-                
-                const data = await resp.json();
-                const content = JSON.parse(atob(data.content));
-                
-                // 转换格式（兼容旧数据）
-                appData = convertLegacyData(content);
-                saveData();
-                
-                showToast('📥 下载成功！', 'success');
-                localStorage.setItem('tunnelAppLastSync', new Date().toISOString());
-                updateSyncStatus();
-                
-                // 如果在管理页面刷新列表
-                if (document.getElementById('adminSection').style.display === 'block') {
-                    renderPasswordList();
-                }
-            } catch (e) {
-                console.error('下载失败:', e);
-                showToast('下载失败，请稍后重试', 'error');
-            }
-        }
-
-        function updateSyncStatus() {
-            const lastSync = localStorage.getItem('tunnelAppLastSync');
-            document.getElementById('syncTime').textContent = lastSync ? 
-                `上次同步：${new Date(lastSync).toLocaleString()}` : '从未同步';
-            document.getElementById('syncData').textContent = 
-                `本地密码数：${appData.publicPasswords.length}个 | 管理密码：${appData.adminPassword.substring(0,3)}***`;
-        }
-
-        // ============ 模态框 ============
-        function showSyncModal() {
-            document.getElementById('syncModal').classList.add('show');
-        }
-
-        function closeModal() {
-            document.getElementById('syncModal').classList.remove('show');
-        }
-
-        // ============ 计算功能 ============
-        function calculate() {
-            const b = parseFloat(document.getElementById('b').value) || 0;
-            const c_ = parseFloat(document.getElementById('c').value) || 0;
-            const L = parseFloat(document.getElementById('L').value) || 0;
-            const a = parseFloat(document.getElementById('a').value) || 0;
-            const d = parseFloat(document.getElementById('d').value) || 0;
-            const a2 = parseFloat(document.getElementById('a2').value) || 0;
-            
-            // 掏槽眼计算
-            const e = a - d;
-            const c = Math.sqrt(b * b + e * e);
-            const angleA = Math.atan(e / b) * 180 / Math.PI;
-            
-            // 辅助眼计算
-            const f = L - a2 - d;
-            const angleB = Math.atan(f / b) * 180 / Math.PI;
-            const g = Math.sqrt(c_ * c_ - b * b) - L + a2 + d;
-            
-            // 显示结果
-            document.getElementById('result_e').textContent = e.toFixed(3) + ' m';
-            document.getElementById('result_c').textContent = c.toFixed(3) + ' m';
-            document.getElementById('result_angleA').textContent = angleA.toFixed(2) + '°';
-            
-            document.getElementById('result_f').textContent = f.toFixed(3) + ' m';
-            document.getElementById('result_angleB').textContent = angleB.toFixed(2) + '°';
-            document.getElementById('result_g').textContent = g.toFixed(3) + ' m';
-        }
-
-        function resetForm() {
-            document.getElementById('b').value = '3.4';
-            document.getElementById('c').value = '4.3';
-            document.getElementById('L').value = '5.5';
-            document.getElementById('a').value = '4.0';
-            document.getElementById('d').value = '0.5';
-            document.getElementById('a2').value = '0.5';
-            
-            document.getElementById('result_e').textContent = '-- m';
-            document.getElementById('result_c').textContent = '-- m';
-            document.getElementById('result_angleA').textContent = '-- °';
-            document.getElementById('result_f').textContent = '-- m';
-            document.getElementById('result_angleB').textContent = '-- °';
-            document.getElementById('result_g').textContent = '-- m';
-        }
-
-        // ============ Toast提示 ============
-        function showToast(message, type = 'info') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast toast-${type} show`;
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        // ============ 启动 ============
+        
         init();
-        // 自动显示登录页面
-        document.getElementById('loginSection').style.display = 'flex';
     </script>
 </body>
 </html>
