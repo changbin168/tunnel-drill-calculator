@@ -1110,7 +1110,7 @@
         let scene, camera, renderer, drillGroup;
         let isDragging = false;
         let previousMouseX = 0, previousMouseY = 0;
-        let rotationX = 0.4, rotationY = 0;  // 从上方往下看的初始角度
+        let rotationX = -1.2, rotationY = 0;  // 从上方俯视的角度
         
         function initView3D() {
             const canvas = document.getElementById('view3dCanvas');
@@ -1121,7 +1121,7 @@
             
             // 相机
             camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 0.1, 1000);
-            camera.position.set(0, 0, 15);  // 从上方往下看
+            camera.position.set(0, 0, 10);  // 从上方往下看
             
             // 渲染器
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
@@ -1226,19 +1226,61 @@
             // 颜色
             const colors = [0xff6b6b, 0xffd93d, 0x6bcb77, 0x4d96ff, 0x9b59b6];
             
-            // 创建掌子面背景
+            // ========== 添加标注和参考线 ==========
+            
+            // 1. 掌子面背景（垂直于进尺方向，绕X轴旋转90度）
             const faceGeometry = new THREE.PlaneGeometry(14, 10);
             const faceMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0x2a2a4a, 
+                color: 0x3a3a5a, 
                 side: THREE.DoubleSide,
                 transparent: true,
-                opacity: 0.5
+                opacity: 0.6
             });
             const face = new THREE.Mesh(faceGeometry, faceMaterial);
-            face.position.z = 0.1;
+            face.position.z = 0.05;
+            face.rotation.x = Math.PI / 2; // 旋转90度，让它垂直
             drillGroup.add(face);
             
-            // 绘制掏槽眼（3组x4排）
+            // 2. 掌子面边框线（Z=0）
+            const faceEdgeMaterial = new THREE.LineBasicMaterial({ color: 0x00d4ff });
+            const faceEdgeGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-7, -5, 0),
+                new THREE.Vector3(7, -5, 0),
+                new THREE.Vector3(7, 5, 0),
+                new THREE.Vector3(-7, 5, 0),
+                new THREE.Vector3(-7, -5, 0)
+            ]);
+            const faceEdge = new THREE.Line(faceEdgeGeometry, faceEdgeMaterial);
+            drillGroup.add(faceEdge);
+            
+            // 3. 洞口边框（Z=进尺，顶部）
+            const caveEdgeGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-7, -5, b),
+                new THREE.Vector3(7, -5, b),
+                new THREE.Vector3(7, 5, b),
+                new THREE.Vector3(-7, 5, b),
+                new THREE.Vector3(-7, -5, b)
+            ]);
+            const caveEdge = new THREE.Line(caveEdgeGeometry, faceEdgeMaterial);
+            drillGroup.add(caveEdge);
+            
+            // 4. 进尺方向箭头（从洞口指向掌子面）
+            const arrowDir = new THREE.Vector3(0, 0, -b); // 向-Z方向
+            const arrowOrigin = new THREE.Vector3(0, 5.5, b); // 洞口上方
+            const arrowLength = b * 0.8;
+            const arrow = new THREE.ArrowHelper(arrowDir.clone().normalize(), arrowOrigin, arrowLength, 0x00ff00, 1, 0.5);
+            drillGroup.add(arrow);
+            
+            // 5. 中心线（从洞口到掌子面）
+            const centerLineMaterial = new THREE.LineBasicMaterial({ color: 0x666666 });
+            const centerLineGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, 0, b + 0.5),
+                new THREE.Vector3(0, 0, -0.5)
+            ]);
+            const centerLine = new THREE.Line(centerLineGeometry, centerLineMaterial);
+            drillGroup.add(centerLine);
+            
+            // ========== 绘制掏槽眼（3组x4排）==========
             // 3组：上中下，组间距
             // 每组4排，每排有左右两个掏槽眼，排间距
             const groupOffsets = [-groupGap, 0, groupGap]; // 上、中、下组的位置
@@ -1251,69 +1293,72 @@
                     
                     // 绘制5级掏槽（左右各一孔）
                     for (let i = 0; i < 5; i++) {
-                        const a = a1 + i * stepA;
-                        const d = d1 + i * stepD;
-                        const e = a - d;
-                        const depth = Math.sqrt(b * b + e * e);
+                        const a = a1 + i * stepA;  // 布眼距离（孔口离中心线）
+                        const d = d1 + i * stepD;  // 孔底离中心线
+                        const e = a - d;           // 相对距离
+                        const drillLen = b;        // 开挖进尺=钻孔深度
                         const angleDeg = Math.atan(e / b) * 180 / Math.PI; // 俯仰角度数
                         
                         const color = colors[i];
                         
                         // 左侧孔
-                        createDrillHole(drillGroup, -a, rowY, d, depth, angleDeg, color, g, r, i, 'L');
+                        createDrillHole(drillGroup, -a, rowY, d, drillLen, angleDeg, color, g, r, i, 'L');
                         
                         // 右侧孔
-                        createDrillHole(drillGroup, a, rowY, d, depth, angleDeg, color, g, r, i, 'R');
+                        createDrillHole(drillGroup, a, rowY, d, drillLen, angleDeg, color, g, r, i, 'R');
                     }
                 }
             }
         }
         
-        function createDrillHole(group, x, y, d, depth, angleA, color, g, r, i, side) {
-            // 坐标系：掌子面在 Z=0，掏槽眼从底部向上倾斜延伸
-            // 开眼位置在掌子面 (x, y, 0)
-            // 孔底位置：向 -Z 延伸（向内），+Y 上升，X向中心线聚拢
+        function createDrillHole(group, x, y, d, drillLength, angleA, color, g, r, i, side) {
+            // 坐标系：
+            // - 掌子面在 Z=0（垂直平面，底部）
+            // - 洞口在 Z=进尺（顶部）
+            // - 进尺方向：从洞口→掌子面（+Z方向）
             
+            // 开眼位置在掌子面 (x, y, 0)
+            // 孔底位置在进尺方向(+Z)，且向中心线聚拢
             const tipX = side === 'L' ? -d : d;  // 孔底X：向中心线聚拢
-            const tipZ = -depth;                 // 孔底Z：向内（-Z）延伸
-            const tipY = y + depth * Math.tan(angleA * Math.PI / 180); // 向上倾斜的高度
+            const tipZ = drillLength;              // 孔底Z：在进尺方向
+            const tipY = y + drillLength * Math.tan(angleA * Math.PI / 180); // 向上倾斜
             
             // 钻孔中点
             const midX = (x + tipX) / 2;
             const midY = (y + tipY) / 2;
             const midZ = tipZ / 2;
             
-            // 计算钻孔长度（两点间距离）
+            // 计算钻孔长度
             const holeLength = Math.sqrt(Math.pow(tipX - x, 2) + Math.pow(tipY - y, 2) + Math.pow(tipZ, 2));
             
-            // 钻孔几何体
+            // 钻孔几何体（垂直于进尺方向）
             const geometry = new THREE.CylinderGeometry(0.06, 0.06, holeLength, 8);
             const material = new THREE.MeshPhongMaterial({ color: color });
             const hole = new THREE.Mesh(geometry, material);
             
             hole.position.set(midX, midY, midZ);
             
-            // 计算旋转角度
+            // 计算旋转：让圆柱从掌子面指向洞口方向
             const dx = tipX - x;
             const dy = tipY - y;
-            const dz = tipZ;  // 负值
-            const rotY = Math.atan2(dx, -dz);  // 绕Y轴：左右倾斜（向内）
-            const rotX = Math.atan2(dy, Math.sqrt(dx*dx + dz*dz)); // 绕X轴：上下倾斜
+            const dz = tipZ;
             
-            hole.rotation.x = rotX;
-            hole.rotation.y = rotY;
+            // 绕X轴旋转（上下倾斜）
+            hole.rotation.x = Math.atan2(dy, Math.sqrt(dx*dx + dz*dz));
+            // 绕Y轴旋转（左右向中心线聚拢）
+            hole.rotation.y = Math.atan2(dx, dz);
             
             group.add(hole);
             
-            // 孔口标记（掌子面上）
-            const mouthGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+            // 孔口标记（掌子面上，Z=0）- 较大
+            const mouthGeometry = new THREE.SphereGeometry(0.12, 8, 8);
             const mouthMaterial = new THREE.MeshBasicMaterial({ color: color });
             const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
             mouth.position.set(x, y, 0);
             group.add(mouth);
             
-            // 孔底标记
-            const tipGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            // 孔底标记（洞口方向，Z=进尺）- 较小
+            const tipGeometry = new THREE.SphereGeometry(0.08, 8, 8);
             const tipMaterial = new THREE.MeshBasicMaterial({ color: color });
             const tip = new THREE.Mesh(tipGeometry, tipMaterial);
             tip.position.set(tipX, tipY, tipZ);
