@@ -4,30 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>三臂凿岩台车开挖角度计算</title>
-    <script>
-    // 版本号 - 每次更新后修改
-    const VERSION = '2026.04.24';
-    
-    // 检测版本更新
-    (async function checkVersion() {
-        try {
-            const res = await fetch('https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/version.txt?t=' + Date.now());
-            const latestVersion = await res.text();
-            if (latestVersion.trim() !== VERSION) {
-                // 找到顶部提示条
-                let toast = document.getElementById('updateToast');
-                if (!toast) {
-                    toast = document.createElement('div');
-                    toast.id = 'updateToast';
-                    toast.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b35;padding:12px;text-align:center;z-index:99999;font-size:16px;cursor:pointer;';
-                    toast.onclick = () => location.reload(true);
-                    document.body.prepend(toast);
-                }
-                toast.innerHTML = '🔄 发现新版本！点击此处刷新页面';
-            }
-        } catch (e) {}
-    })();
-    </script>
     <style>
         * {
             margin: 0;
@@ -744,47 +720,99 @@
             deviceId: localStorage.getItem('tunnel_device_id') || ''
         };
         
-        // ====== 云端密码同步 ======
-        const CDN_URL = 'https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/app_data.json';
+        // ====== 本地存储 + GitHub云端同步 ======
         
-        // 从云端获取最新密码（每次登录时强制刷新）
-        async function fetchCloudPasswords() {
+        // Worker URL（需要根据实际部署修改）
+        const WORKER_URL = 'https://tunnel-drill-calculator.changbin168.workers.dev';
+        
+        // 获取GitHub配置（从Worker注入）
+        function getGitHubConfig() {
+            return {
+                token: window.GITHUB_TOKEN || null,
+                owner: window.REPO_OWNER || null,
+                repo: window.REPO_NAME || null
+            };
+        }
+        
+        // 从Worker加载配置
+        async function loadGitHubConfig() {
             try {
-                const res = await fetch(CDN_URL + '?t=' + Date.now());
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.passwords) state.passwords = data.passwords;
-                    if (data.adminPassword) state.adminPassword = data.adminPassword;
-                    updateSyncStatus('已同步云端密码');
+                const resp = await fetch(WORKER_URL + '/inject.js');
+                if (resp.ok) {
+                    eval(await resp.text());
+                    console.log('GitHub配置已从Worker加载');
                 }
             } catch (e) {
-                console.log('云端密码同步失败，使用本地数据');
+                console.log('无法从Worker加载配置，跳过云端同步');
             }
         }
         
-        // 保存到云端
-        async function saveToCloud() {
+        // 页面加载时自动获取配置
+        loadGitHubConfig();
+        
+        // 保存到GitHub
+        async function saveToGitHub(data) {
+            const config = getGitHubConfig();
+            if (!config.token || !config.owner || !config.repo) {
+                console.log('GitHub环境变量未配置，跳过云端同步');
+                return false;
+            }
+            
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+            const path = 'app_data.json';
+            const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${path}`;
+            
             try {
-                const data = {
-                    passwords: state.passwords,
-                    adminPassword: state.adminPassword
+                // 先获取当前文件的 SHA（如果存在）
+                let sha = null;
+                const getResp = await fetch(url, {
+                    headers: { 'Authorization': `token ${config.token}` }
+                });
+                if (getResp.ok) {
+                    const existing = await getResp.json();
+                    sha = existing.sha;
+                }
+                
+                // 上传文件
+                const body = {
+                    message: `自动同步数据 ${new Date().toLocaleString()}`,
+                    content: content
                 };
-                // 注意：云端保存需要GitHub API，这里只更新本地
-                // 本地保存后需要手动上传
-                saveState();
+                if (sha) body.sha = sha;
+                
+                const resp = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${config.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                if (resp.ok) {
+                    console.log('数据已同步到GitHub');
+                    return true;
+                } else {
+                    console.error('GitHub上传失败:', resp.status);
+                    return false;
+                }
             } catch (e) {
-                console.error('保存失败', e);
+                console.error('GitHub上传异常:', e);
+                return false;
             }
         }
         
-        // ====== 本地存储 ======
         function saveState() {
             const saveData = {
                 passwords: state.passwords,
                 adminPassword: state.adminPassword
             };
             localStorage.setItem('tunnel_app_data', JSON.stringify(saveData));
-            updateSyncStatus('已保存到本地');
+            
+            // 异步保存到GitHub
+            saveToGitHub(saveData).then(success => {
+                updateSyncStatus(success ? '已保存到本地 + GitHub云端' : '已保存到本地');
+            });
         }
         
         function loadState() {
@@ -859,10 +887,7 @@
             document.getElementById('adminErrorMsg').style.display = 'none';
         }
         
-        async function loginPublic() {
-            // 每次登录前先从云端获取最新密码
-            await fetchCloudPasswords();
-            
+        function loginPublic() {
             const password = document.getElementById('password').value;
             
             // 查找密码
@@ -893,10 +918,7 @@
             showMain();
         }
         
-        async function loginAdmin() {
-            // 每次登录前先从云端获取最新密码
-            await fetchCloudPasswords();
-            
+        function loginAdmin() {
             const password = document.getElementById('adminPassword').value;
             
             if (password !== state.adminPassword) {
