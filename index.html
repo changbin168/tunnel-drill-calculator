@@ -1110,7 +1110,7 @@
         let scene, camera, renderer, drillGroup;
         let isDragging = false;
         let previousMouseX = 0, previousMouseY = 0;
-        let rotationX = 0.3, rotationY = 0;
+        let rotationX = -0.5, rotationY = 0;  // 从底部往上看的初始角度
         
         function initView3D() {
             const canvas = document.getElementById('view3dCanvas');
@@ -1121,7 +1121,7 @@
             
             // 相机
             camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 0.1, 1000);
-            camera.position.set(0, 0, 20);
+            camera.position.set(0, 0, -15);  // 从底部往上看掌子面
             
             // 渲染器
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
@@ -1279,11 +1279,11 @@
             const material = new THREE.MeshPhongMaterial({ color: color });
             const hole = new THREE.Mesh(geometry, material);
             
-            // 计算孔底位置：向中心线聚拢
+            // 坐标系调整：掌子面在 Z=0（底部），掏槽眼向 +Z 方向（外）延伸
             // 开眼位置在掌子面 (x, y, 0)
-            // 孔底位置：d是孔底到中心线的距离
+            // 孔底位置：d是孔底到中心线的距离，向 +Z 延伸
             const tipX = side === 'L' ? -d : d;
-            const tipZ = -depth; // 向隧道内部延伸
+            const tipZ = depth; // 向隧道外部（+Z）延伸
             
             // 钻孔中点位置
             const midX = (x + tipX) / 2;
@@ -1294,13 +1294,13 @@
             // 计算旋转角度：让钻孔从开眼位置指向孔底
             const dx = tipX - x;
             const dz = tipZ;
-            const rotY = Math.atan2(dx, -dz); // 绕Y轴旋转
+            const rotY = Math.atan2(dx, dz); // 绕Y轴旋转
             
             hole.rotation.y = rotY;
             
             group.add(hole);
             
-            // 孔口标记（掌子面上）
+            // 孔口标记（掌子面上，Z=0）
             const mouthGeometry = new THREE.SphereGeometry(0.08, 8, 8);
             const mouthMaterial = new THREE.MeshBasicMaterial({ color: color });
             const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
