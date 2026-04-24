@@ -1272,10 +1272,10 @@
         function createDrillHole(group, x, y, d, depth, angleA, color, g, r, i, side) {
             // 坐标系：掌子面在 Z=0，掏槽眼从底部向上倾斜延伸
             // 开眼位置在掌子面 (x, y, 0)
-            // 孔底位置：向 +Z 延伸，+Y 上升，X向中心线聚拢
+            // 孔底位置：向 -Z 延伸（向内），+Y 上升，X向中心线聚拢
             
-            const tipX = side === 'L' ? -d : d;  // 孔底X：向中心线
-            const tipZ = depth;                  // 孔底Z：水平延伸
+            const tipX = side === 'L' ? -d : d;  // 孔底X：向中心线聚拢
+            const tipZ = -depth;                 // 孔底Z：向内（-Z）延伸
             const tipY = y + depth * Math.tan(angleA * Math.PI / 180); // 向上倾斜的高度
             
             // 钻孔中点
@@ -1296,8 +1296,9 @@
             // 计算旋转角度
             const dx = tipX - x;
             const dy = tipY - y;
-            const rotY = Math.atan2(dx, tipZ);  // 绕Y轴：左右倾斜
-            const rotX = Math.atan2(dy, Math.sqrt(dx*dx + tipZ*tipZ)); // 绕X轴：上下倾斜
+            const dz = tipZ;  // 负值
+            const rotY = Math.atan2(dx, -dz);  // 绕Y轴：左右倾斜（向内）
+            const rotX = Math.atan2(dy, Math.sqrt(dx*dx + dz*dz)); // 绕X轴：上下倾斜
             
             hole.rotation.x = rotX;
             hole.rotation.y = rotY;
