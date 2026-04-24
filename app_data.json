@@ -4,11 +4,6 @@
       "id": "1",
       "password": "321",
       "times": 10
-    },
-    {
-      "pwd": "1",
-      "uses": 10,
-      "used": 0
     }
   ],
   "adminPassword": "admin2026"
