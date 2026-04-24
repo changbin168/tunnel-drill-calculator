@@ -722,12 +722,18 @@
         
         // ====== 本地存储 + GitHub云端同步 ======
         
-        // GitHub 配置（直接使用）
+        // GitHub 配置（从 localStorage 获取，用户首次需要输入）
         const GITHUB_CONFIG = {
-            token: 'ghp_QAyKwqXJBb1vRQFbK5eR7gGm3pLH2F8Q9aT',
+            token: localStorage.getItem('github_token') || '',
             owner: 'changbin168',
             repo: 'tunnel-drill-calculator'
         };
+        
+        // 保存 Token 到 localStorage
+        function saveGitHubToken(token) {
+            localStorage.setItem('github_token', token);
+            GITHUB_CONFIG.token = token;
+        }
         
         // 获取GitHub配置
         function getGitHubConfig() {
@@ -738,8 +744,18 @@
         async function saveToGitHub(data) {
             const config = getGitHubConfig();
             if (!config.token || !config.owner || !config.repo) {
-                console.log('GitHub环境变量未配置，跳过云端同步');
-                return false;
+                // 检查是否有 Token，没有则显示输入框
+                const savedToken = localStorage.getItem('github_token');
+                if (!savedToken) {
+                    const token = prompt('首次使用云同步，请输入您的 GitHub Token：\n\n（Token 将保存在浏览器本地，不会上传）');
+                    if (token && token.trim()) {
+                        saveGitHubToken(token.trim());
+                        console.log('GitHub Token 已保存');
+                    } else {
+                        console.log('未输入Token，跳过云端同步');
+                        return false;
+                    }
+                }
             }
             
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
