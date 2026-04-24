@@ -1,9 +1,9 @@
 {
   "passwords": [
     {
-      "pwd": "111",
+      "pwd": "1",
       "uses": 10,
-      "used": 1
+      "used": 0
     }
   ],
   "adminPassword": "admin2026"
