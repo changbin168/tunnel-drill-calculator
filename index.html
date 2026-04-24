@@ -1279,24 +1279,39 @@
             const material = new THREE.MeshPhongMaterial({ color: color });
             const hole = new THREE.Mesh(geometry, material);
             
-            // 位置：孔口在掌子面（z=0），向-Z方向延伸
-            hole.position.set(x, y, -depth / 2);
+            // 计算孔底位置：向中心线聚拢
+            // 开眼位置在掌子面 (x, y, 0)
+            // 孔底位置：d是孔底到中心线的距离
+            const tipX = side === 'L' ? -d : d;
+            const tipZ = -depth; // 向隧道内部延伸
             
-            // 旋转：左右倾斜朝向中心线
-            // 左侧孔（x<0）向+X倾斜，右侧孔（x>0）向-X倾斜
-            if (side === 'L') {
-                hole.rotation.y = angle;  // 左侧向中心线倾斜
-            } else {
-                hole.rotation.y = -angle;  // 右侧向中心线倾斜
-            }
+            // 钻孔中点位置
+            const midX = (x + tipX) / 2;
+            const midZ = tipZ / 2;
+            
+            hole.position.set(midX, y, midZ);
+            
+            // 计算旋转角度：让钻孔从开眼位置指向孔底
+            const dx = tipX - x;
+            const dz = tipZ;
+            const rotY = Math.atan2(dx, -dz); // 绕Y轴旋转
+            
+            hole.rotation.y = rotY;
             
             group.add(hole);
+            
+            // 孔口标记（掌子面上）
+            const mouthGeometry = new THREE.SphereGeometry(0.08, 8, 8);
+            const mouthMaterial = new THREE.MeshBasicMaterial({ color: color });
+            const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
+            mouth.position.set(x, y, 0);
+            group.add(mouth);
             
             // 孔底标记
             const tipGeometry = new THREE.SphereGeometry(0.1, 8, 8);
             const tipMaterial = new THREE.MeshBasicMaterial({ color: color });
             const tip = new THREE.Mesh(tipGeometry, tipMaterial);
-            tip.position.set(x, y, -depth);
+            tip.position.set(tipX, y, tipZ);
             group.add(tip);
         }
         
