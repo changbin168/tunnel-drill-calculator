@@ -1270,19 +1270,25 @@
         }
         
         function createDrillHole(group, x, y, d, depth, angle, color, g, r, i, side) {
-            const e = Math.abs(x) - d;
             const holeLength = depth;
             
-            // 钻孔几何体（圆柱）
+            // 钻孔几何体（沿Z轴延伸）
             const geometry = new THREE.CylinderGeometry(0.06, 0.06, holeLength, 8);
+            geometry.rotateX(Math.PI / 2); // 旋转让圆柱沿Z轴
+            
             const material = new THREE.MeshPhongMaterial({ color: color });
             const hole = new THREE.Mesh(geometry, material);
             
             // 位置：孔口在掌子面（z=0），向-Z方向延伸
             hole.position.set(x, y, -depth / 2);
             
-            // 旋转：沿Y轴旋转角度决定左右倾斜，沿X轴旋转决定俯仰角
-            hole.rotation.x = angle;
+            // 旋转：左右倾斜朝向中心线
+            // 左侧孔（x<0）向+X倾斜，右侧孔（x>0）向-X倾斜
+            if (side === 'L') {
+                hole.rotation.y = angle;  // 左侧向中心线倾斜
+            } else {
+                hole.rotation.y = -angle;  // 右侧向中心线倾斜
+            }
             
             group.add(hole);
             
