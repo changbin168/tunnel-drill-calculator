@@ -1110,7 +1110,7 @@
         let scene, camera, renderer, drillGroup;
         let isDragging = false;
         let previousMouseX = 0, previousMouseY = 0;
-        let rotationX = -0.5, rotationY = 0;  // 从底部往上看的初始角度
+        let rotationX = 0.4, rotationY = 0;  // 从上方往下看的初始角度
         
         function initView3D() {
             const canvas = document.getElementById('view3dCanvas');
@@ -1121,7 +1121,7 @@
             
             // 相机
             camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 0.1, 1000);
-            camera.position.set(0, 0, -15);  // 从底部往上看掌子面
+            camera.position.set(0, 0, 15);  // 从上方往下看
             
             // 渲染器
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
@@ -1255,52 +1255,56 @@
                         const d = d1 + i * stepD;
                         const e = a - d;
                         const depth = Math.sqrt(b * b + e * e);
-                        const angle = Math.atan(e / b);
+                        const angleDeg = Math.atan(e / b) * 180 / Math.PI; // 俯仰角度数
                         
                         const color = colors[i];
                         
                         // 左侧孔
-                        createDrillHole(drillGroup, -a, rowY, d, depth, angle, color, g, r, i, 'L');
+                        createDrillHole(drillGroup, -a, rowY, d, depth, angleDeg, color, g, r, i, 'L');
                         
                         // 右侧孔
-                        createDrillHole(drillGroup, a, rowY, d, depth, angle, color, g, r, i, 'R');
+                        createDrillHole(drillGroup, a, rowY, d, depth, angleDeg, color, g, r, i, 'R');
                     }
                 }
             }
         }
         
-        function createDrillHole(group, x, y, d, depth, angle, color, g, r, i, side) {
-            const holeLength = depth;
+        function createDrillHole(group, x, y, d, depth, angleA, color, g, r, i, side) {
+            // 坐标系：掌子面在 Z=0，掏槽眼从底部向上倾斜延伸
+            // 开眼位置在掌子面 (x, y, 0)
+            // 孔底位置：向 +Z 延伸，+Y 上升，X向中心线聚拢
             
-            // 钻孔几何体（沿Z轴延伸）
+            const tipX = side === 'L' ? -d : d;  // 孔底X：向中心线
+            const tipZ = depth;                  // 孔底Z：水平延伸
+            const tipY = y + depth * Math.tan(angleA * Math.PI / 180); // 向上倾斜的高度
+            
+            // 钻孔中点
+            const midX = (x + tipX) / 2;
+            const midY = (y + tipY) / 2;
+            const midZ = tipZ / 2;
+            
+            // 计算钻孔长度（两点间距离）
+            const holeLength = Math.sqrt(Math.pow(tipX - x, 2) + Math.pow(tipY - y, 2) + Math.pow(tipZ, 2));
+            
+            // 钻孔几何体
             const geometry = new THREE.CylinderGeometry(0.06, 0.06, holeLength, 8);
-            geometry.rotateX(Math.PI / 2); // 旋转让圆柱沿Z轴
-            
             const material = new THREE.MeshPhongMaterial({ color: color });
             const hole = new THREE.Mesh(geometry, material);
             
-            // 坐标系调整：掌子面在 Z=0（底部），掏槽眼向 +Z 方向（外）延伸
-            // 开眼位置在掌子面 (x, y, 0)
-            // 孔底位置：d是孔底到中心线的距离，向 +Z 延伸
-            const tipX = side === 'L' ? -d : d;
-            const tipZ = depth; // 向隧道外部（+Z）延伸
+            hole.position.set(midX, midY, midZ);
             
-            // 钻孔中点位置
-            const midX = (x + tipX) / 2;
-            const midZ = tipZ / 2;
-            
-            hole.position.set(midX, y, midZ);
-            
-            // 计算旋转角度：让钻孔从开眼位置指向孔底
+            // 计算旋转角度
             const dx = tipX - x;
-            const dz = tipZ;
-            const rotY = Math.atan2(dx, dz); // 绕Y轴旋转
+            const dy = tipY - y;
+            const rotY = Math.atan2(dx, tipZ);  // 绕Y轴：左右倾斜
+            const rotX = Math.atan2(dy, Math.sqrt(dx*dx + tipZ*tipZ)); // 绕X轴：上下倾斜
             
+            hole.rotation.x = rotX;
             hole.rotation.y = rotY;
             
             group.add(hole);
             
-            // 孔口标记（掌子面上，Z=0）
+            // 孔口标记（掌子面上）
             const mouthGeometry = new THREE.SphereGeometry(0.08, 8, 8);
             const mouthMaterial = new THREE.MeshBasicMaterial({ color: color });
             const mouth = new THREE.Mesh(mouthGeometry, mouthMaterial);
@@ -1311,7 +1315,7 @@
             const tipGeometry = new THREE.SphereGeometry(0.1, 8, 8);
             const tipMaterial = new THREE.MeshBasicMaterial({ color: color });
             const tip = new THREE.Mesh(tipGeometry, tipMaterial);
-            tip.position.set(tipX, y, tipZ);
+            tip.position.set(tipX, tipY, tipZ);
             group.add(tip);
         }
         
