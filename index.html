@@ -744,6 +744,39 @@
             deviceId: localStorage.getItem('tunnel_device_id') || ''
         };
         
+        // ====== 云端密码同步 ======
+        const CDN_URL = 'https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/app_data.json';
+        
+        // 从云端获取最新密码（每次登录时强制刷新）
+        async function fetchCloudPasswords() {
+            try {
+                const res = await fetch(CDN_URL + '?t=' + Date.now());
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.passwords) state.passwords = data.passwords;
+                    if (data.adminPassword) state.adminPassword = data.adminPassword;
+                    updateSyncStatus('已同步云端密码');
+                }
+            } catch (e) {
+                console.log('云端密码同步失败，使用本地数据');
+            }
+        }
+        
+        // 保存到云端
+        async function saveToCloud() {
+            try {
+                const data = {
+                    passwords: state.passwords,
+                    adminPassword: state.adminPassword
+                };
+                // 注意：云端保存需要GitHub API，这里只更新本地
+                // 本地保存后需要手动上传
+                saveState();
+            } catch (e) {
+                console.error('保存失败', e);
+            }
+        }
+        
         // ====== 本地存储 ======
         function saveState() {
             const saveData = {
@@ -826,7 +859,10 @@
             document.getElementById('adminErrorMsg').style.display = 'none';
         }
         
-        function loginPublic() {
+        async function loginPublic() {
+            // 每次登录前先从云端获取最新密码
+            await fetchCloudPasswords();
+            
             const password = document.getElementById('password').value;
             
             // 查找密码
@@ -857,7 +893,10 @@
             showMain();
         }
         
-        function loginAdmin() {
+        async function loginAdmin() {
+            // 每次登录前先从云端获取最新密码
+            await fetchCloudPasswords();
+            
             const password = document.getElementById('adminPassword').value;
             
             if (password !== state.adminPassword) {
