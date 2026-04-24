@@ -722,33 +722,17 @@
         
         // ====== 本地存储 + GitHub云端同步 ======
         
-        // Worker URL（已配置）
-        const WORKER_URL = 'https://github-sync.415222979.workers.dev';
+        // GitHub 配置（直接使用）
+        const GITHUB_CONFIG = {
+            token: 'ghp_QAyKwqXJBb1vRQFbK5eR7gGm3pLH2F8Q9aT',
+            owner: 'changbin168',
+            repo: 'tunnel-drill-calculator'
+        };
         
-        // 获取GitHub配置（从Worker注入）
+        // 获取GitHub配置
         function getGitHubConfig() {
-            return {
-                token: window.GITHUB_TOKEN || null,
-                owner: window.REPO_OWNER || null,
-                repo: window.REPO_NAME || null
-            };
+            return GITHUB_CONFIG;
         }
-        
-        // 从Worker加载配置
-        async function loadGitHubConfig() {
-            try {
-                const resp = await fetch(WORKER_URL + '/inject.js');
-                if (resp.ok) {
-                    eval(await resp.text());
-                    console.log('GitHub配置已从Worker加载');
-                }
-            } catch (e) {
-                console.log('无法从Worker加载配置，跳过云端同步');
-            }
-        }
-        
-        // 页面加载时自动获取配置
-        loadGitHubConfig();
         
         // 保存到GitHub
         async function saveToGitHub(data) {
