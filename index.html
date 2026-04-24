@@ -4,6 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>三臂凿岩台车开挖角度计算</title>
+    <script>
+    // 版本号 - 每次更新后修改
+    const VERSION = '2026.04.24';
+    
+    // 检测版本更新
+    (async function checkVersion() {
+        try {
+            const res = await fetch('https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/version.txt?t=' + Date.now());
+            const latestVersion = await res.text();
+            if (latestVersion.trim() !== VERSION) {
+                // 找到顶部提示条
+                let toast = document.getElementById('updateToast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'updateToast';
+                    toast.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b35;padding:12px;text-align:center;z-index:99999;font-size:16px;cursor:pointer;';
+                    toast.onclick = () => location.reload(true);
+                    document.body.prepend(toast);
+                }
+                toast.innerHTML = '🔄 发现新版本！点击此处刷新页面';
+            }
+        } catch (e) {}
+    })();
+    </script>
     <style>
         * {
             margin: 0;
