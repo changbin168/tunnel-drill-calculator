@@ -1,5 +1,5 @@
 {
-  "version": "v6_俯视图版",
-  "description": "原始版本，只有俯视图，无3D视图",
+  "version": "v7_3D视图版",
+  "description": "3D视图版，在俯视图版基础上添加3D掏槽眼视图",
   "date": "2026-04-24"
 }
