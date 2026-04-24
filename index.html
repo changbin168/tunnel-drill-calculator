@@ -969,7 +969,7 @@
             const password = document.getElementById('password').value;
             
             // 查找密码
-            const pwdObj = state.passwords.find(p => p.password === password);
+            const pwdObj = state.passwords.find(p => p.pwd === password);
             
             if (!pwdObj) {
                 document.getElementById('errorMsg').textContent = '密码错误';
