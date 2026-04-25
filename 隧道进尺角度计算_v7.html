@@ -768,7 +768,13 @@
                     },
                     body: JSON.stringify(body)
                 });
-                return resp.ok || resp.status === 201;
+                if (resp.ok) {
+                    console.log('GitHub API保存成功');
+                    return true;
+                }
+                const errText = await resp.text();
+                console.error('GitHub API错误:', resp.status, errText);
+                return false;
             } catch (e) {
                 console.error('保存失败:', e);
                 return false;
