@@ -4,6 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>三臂凿岩台车开挖角度计算</title>
+    <script>
+    // 版本号 - 每次更新后修改
+    const VERSION = '2026.04.24';
+    
+    // 检测版本更新
+    (async function checkVersion() {
+        try {
+            const res = await fetch('https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/version.txt?t=' + Date.now());
+            const latestVersion = await res.text();
+            if (latestVersion.trim() !== VERSION) {
+                // 找到顶部提示条
+                let toast = document.getElementById('updateToast');
+                if (!toast) {
+                    toast = document.createElement('div');
+                    toast.id = 'updateToast';
+                    toast.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#ff6b35;padding:12px;text-align:center;z-index:99999;font-size:16px;cursor:pointer;';
+                    toast.onclick = () => location.reload(true);
+                    document.body.prepend(toast);
+                }
+                toast.innerHTML = '🔄 发现新版本！点击此处刷新页面';
+            }
+        } catch (e) {}
+    })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -720,95 +744,61 @@
             deviceId: localStorage.getItem('tunnel_device_id') || ''
         };
         
-        // ====== 本地存储 + GitHub云端同步 ======
+        // ====== 云端密码同步 ======
+        const CDN_URL = 'https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/app_data.json';
         
-        // Worker 服务地址（已更新）
-        const WORKER_URL = 'https://github-sync.415222979.workers.dev';
-        
-        // 初始化 Worker URL
-        function getWorkerUrl() {
-            // 始终使用正确的 Worker 地址
-            localStorage.setItem('worker_url', WORKER_URL);
-            return WORKER_URL;
-        }
-        
-        // 保存到 Worker
-        async function saveToWorker(data) {
-            const url = getWorkerUrl();
+        // 从云端获取最新密码（每次登录时强制刷新）
+        async function fetchCloudPasswords() {
             try {
-                const resp = await fetch(url + '/api/data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                return resp.ok;
+                const res = await fetch(CDN_URL + '?t=' + Date.now());
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.passwords) state.passwords = data.passwords;
+                    if (data.adminPassword) state.adminPassword = data.adminPassword;
+                    updateSyncStatus('已同步云端密码');
+                }
             } catch (e) {
-                console.error('保存失败:', e);
-                return false;
+                console.log('云端密码同步失败，使用本地数据');
             }
         }
         
+        // 保存到云端
+        async function saveToCloud() {
+            try {
+                const data = {
+                    passwords: state.passwords,
+                    adminPassword: state.adminPassword
+                };
+                // 注意：云端保存需要GitHub API，这里只更新本地
+                // 本地保存后需要手动上传
+                saveState();
+            } catch (e) {
+                console.error('保存失败', e);
+            }
+        }
+        
+        // ====== 本地存储 ======
         function saveState() {
             const saveData = {
                 passwords: state.passwords,
                 adminPassword: state.adminPassword
             };
             localStorage.setItem('tunnel_app_data', JSON.stringify(saveData));
-            
-            // 异步保存到 Worker
-            saveToWorker(saveData).then(success => {
-                updateSyncStatus(success ? '已保存到本地 + 云端' : '已保存到本地');
-            });
-        }
-        
-        // 从 Worker 加载最新数据（同步版本）
-        function loadFromGitHubSync() {
-            updateSyncStatus('正在从云端同步...');
-            const url = getWorkerUrl();
-            
-            try {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', url + '/api/data', false);
-                xhr.send(null);
-                
-                if (xhr.status === 200) {
-                    const data = JSON.parse(xhr.responseText);
-                    localStorage.setItem('tunnel_app_data', JSON.stringify(data));
-                    state.passwords = data.passwords || [];
-                    state.adminPassword = data.adminPassword || 'admin2026';
-                    updateSyncStatus('已从云端同步 ✓');
-                    return true;
-                }
-                updateSyncStatus('云端同步失败，使用本地数据');
-            } catch (e) {
-                console.error('同步异常:', e);
-                updateSyncStatus('同步异常，使用本地数据');
-            }
-            return false;
-        }
-        
-        // 异步版本
-        async function loadFromGitHubAsync() {
-            const url = getWorkerUrl();
-            try {
-                const resp = await fetch(url + '/api/data');
-                if (resp.ok) {
-                    const data = await resp.json();
-                    localStorage.setItem('tunnel_app_data', JSON.stringify(data));
-                    state.passwords = data.passwords || [];
-                    state.adminPassword = data.adminPassword || 'admin2026';
-                    updateSyncStatus('已从云端同步 ✓');
-                    return true;
-                }
-            } catch (e) {
-                console.error('同步异常:', e);
-            }
-            return false;
+            updateSyncStatus('已保存到本地');
         }
         
         function loadState() {
-            // 强制从 GitHub 同步最新数据（同步）
-            loadFromGitHubSync();
+            const saved = localStorage.getItem('tunnel_app_data');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (data.passwords) state.passwords = data.passwords;
+                    if (data.adminPassword) state.adminPassword = data.adminPassword;
+                    updateSyncStatus('已加载本地数据');
+                } catch (e) {
+                    console.error('加载数据失败', e);
+                }
+            }
         }
         
         function updateSyncStatus(msg) {
@@ -869,9 +859,9 @@
             document.getElementById('adminErrorMsg').style.display = 'none';
         }
         
-        function loginPublic() {
-            // 登录前强制从云端同步最新数据
-            loadFromGitHubSync();
+        async function loginPublic() {
+            // 每次登录前先从云端获取最新密码
+            await fetchCloudPasswords();
             
             const password = document.getElementById('password').value;
             
@@ -903,9 +893,9 @@
             showMain();
         }
         
-        function loginAdmin() {
-            // 登录前强制从云端同步最新数据
-            loadFromGitHubSync();
+        async function loginAdmin() {
+            // 每次登录前先从云端获取最新密码
+            await fetchCloudPasswords();
             
             const password = document.getElementById('adminPassword').value;
             
