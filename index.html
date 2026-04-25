@@ -558,8 +558,23 @@
             <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
             <h3>☁️ 数据同步</h3>
             <p style="color: #888; font-size: 14px; margin-bottom: 15px;">
-                说明：数据会自动同步到云端，修改后等待几秒即可在其他设备使用。<br>
+                说明：配置GitHub Token后可实现多设备密码同步。<br>
             </p>
+            
+            <!-- Token配置 -->
+            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="password" id="githubTokenInput" placeholder="粘贴GitHub Token" style="flex: 1; min-width: 200px;">
+                    <button class="btn-save" onclick="saveGitHubTokenConfig()" style="background: #4CAF50;">保存Token</button>
+                </div>
+                <p style="color: #666; font-size: 11px; margin-top: 8px;">
+                    Token状态：<span id="tokenStatus">未配置</span>
+                </p>
+                <p style="color: #555; font-size: 11px; margin-top: 5px;">
+                    如何获取？访问 <a href="https://github.com/settings/tokens" target="_blank" style="color: #00d4ff;">github.com/settings/tokens</a> 创建Classic Token，勾选repo权限
+                </p>
+            </div>
+            
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button class="btn-save" onclick="exportData()" style="flex: 1;">📤 导出备份</button>
                 <button class="btn-save" onclick="copyData()" style="flex: 1; background: #2196F3;">📋 复制数据</button>
@@ -725,20 +740,39 @@
         
         // ====== 本地存储 + GitHub云端同步 ======
         
-        // GitHub 直接同步（国内可访问）
-        // Token base64编码防止GitHub secret扫描检测
-        const _tk = 'Z2hwX2VzV2JhYmZlemlpajFFMFJObTZqaUVyVldvUXZrVzRBbnh5RQ==';
-        const GITHUB_TOKEN = atob(_tk);
+        // GitHub 配置 - 用户需要配置自己的Token
+        // 1. 访问 https://github.com/settings/tokens 创建 Personal Access Token
+        // 2. 需要勾选 repo 权限
+        // 3. 将Token粘贴到下方并保存
+        
         const REPO_OWNER = 'changbin168';
         const REPO_NAME = 'tunnel-drill-calculator';
         const FILE_PATH = 'app_data.json';
         
+        // 获取Token（优先使用用户配置的，否则为空）
+        function getGitHubToken() {
+            return localStorage.getItem('github_token') || '';
+        }
+        
+        // 保存Token到本地
+        function saveGitHubToken(token) {
+            localStorage.setItem('github_token', token);
+        }
+        
+        // 检查是否已配置Token
+        function hasGitHubToken() {
+            return !!getGitHubToken();
+        }
+        
         // 获取当前文件 SHA（用于更新）
         async function getFileSha() {
+            const token = getGitHubToken();
+            if (!token) return null;
+            
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
             try {
                 const resp = await fetch(url, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                    headers: { 'Authorization': `token ${token}` }
                 });
                 if (resp.ok) {
                     const data = await resp.json();
@@ -750,6 +784,12 @@
         
         // 保存到 GitHub（直接API，国内可访问）
         async function saveToGitHub(data) {
+            const token = getGitHubToken();
+            if (!token) {
+                console.log('未配置GitHub Token，跳过云同步');
+                return false;
+            }
+            
             try {
                 const sha = await getFileSha();
                 const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
@@ -763,7 +803,7 @@
                 const resp = await fetch(url, {
                     method: 'PUT',
                     headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Authorization': `token ${token}`,
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(body)
@@ -804,12 +844,18 @@
         
         // 从 GitHub 加载数据（同步版本）
         async function loadFromGitHubSync() {
+            const token = getGitHubToken();
+            if (!token) {
+                updateSyncStatus('请先配置GitHub Token');
+                return false;
+            }
+            
             updateSyncStatus('正在从云端同步...');
             const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
             
             try {
                 const resp = await fetch(url, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                    headers: { 'Authorization': `token ${token}` }
                 });
                 
                 if (resp.ok) {
@@ -831,10 +877,16 @@
         
         // 异步版本 - 优先 GitHub API
         async function loadFromGitHubAsync() {
+            const token = getGitHubToken();
+            if (!token) {
+                // 降级：使用 jsDelivr CDN
+                return loadFromCDN();
+            }
+            
             try {
                 const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
                 const resp = await fetch(url, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                    headers: { 'Authorization': `token ${token}` }
                 });
                 if (resp.ok) {
                     const data = await resp.json();
@@ -850,6 +902,11 @@
             }
             
             // 降级：使用 jsDelivr CDN
+            return loadFromCDN();
+        }
+        
+        // 从CDN加载数据
+        async function loadFromCDN() {
             try {
                 const cdnUrl = 'https://cdn.jsdelivr.net/gh/changbin168/tunnel-drill-calculator@main/app_data.json';
                 const resp = await fetch(cdnUrl + '?t=' + Date.now());
@@ -870,6 +927,8 @@
         }
         
         function loadState() {
+            // 更新Token状态显示
+            updateTokenStatus();
             // 强制从 GitHub 同步最新数据（同步）
             loadFromGitHubSync();
         }
@@ -877,6 +936,39 @@
         function updateSyncStatus(msg) {
             const el = document.getElementById('syncStatus');
             if (el) el.textContent = '同步状态：' + msg;
+        }
+        
+        // 保存GitHub Token
+        function saveGitHubTokenConfig() {
+            const token = document.getElementById('githubTokenInput').value.trim();
+            if (!token) {
+                showToast('请输入Token', true);
+                return;
+            }
+            if (!token.startsWith('ghp_') && !token.startsWith('github_pat_')) {
+                showToast('Token格式不正确，应以ghp_或github_pat_开头', true);
+                return;
+            }
+            saveGitHubToken(token);
+            document.getElementById('githubTokenInput').value = '';
+            updateTokenStatus();
+            showToast('Token已保存，开始同步...');
+            // 触发一次同步
+            saveState();
+        }
+        
+        // 更新Token状态显示
+        function updateTokenStatus() {
+            const statusEl = document.getElementById('tokenStatus');
+            if (statusEl) {
+                if (hasGitHubToken()) {
+                    statusEl.textContent = '已配置 ✓';
+                    statusEl.style.color = '#4CAF50';
+                } else {
+                    statusEl.textContent = '未配置';
+                    statusEl.style.color = '#ff6b6b';
+                }
+            }
         }
         
         function exportData() {
