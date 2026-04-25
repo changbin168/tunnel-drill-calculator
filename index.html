@@ -722,17 +722,13 @@
         
         // ====== 本地存储 + GitHub云端同步 ======
         
-        // Worker 服务地址（用户部署后填写）
-        const WORKER_URL = localStorage.getItem('worker_url') || '';
+        // Worker 服务地址（已更新）
+        const WORKER_URL = 'https://github-sync.5018fadc9dda23485221025670450.workers.dev';
         
         // 初始化 Worker URL
         function getWorkerUrl() {
-            if (!WORKER_URL) {
-                // 默认使用这个地址（部署后修改）
-                const defaultUrl = 'https://github-sync.415222979.workers.dev';
-                localStorage.setItem('worker_url', defaultUrl);
-                return defaultUrl;
-            }
+            // 始终使用正确的 Worker 地址
+            localStorage.setItem('worker_url', WORKER_URL);
             return WORKER_URL;
         }
         
