@@ -24,6 +24,11 @@
       "pwd": "123",
       "uses": 10,
       "used": 2
+    },
+    {
+      "pwd": "789",
+      "uses": 10,
+      "used": 0
     }
   ],
   "adminPassword": "admin2026"
