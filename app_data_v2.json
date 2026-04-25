@@ -1,0 +1,15 @@
+{
+  "passwords": [
+    {
+      "pwd": "1",
+      "uses": 10,
+      "used": 3
+    },
+    {
+      "pwd": "2",
+      "uses": 10,
+      "used": 2
+    }
+  ],
+  "adminPassword": "admin2026"
+}
