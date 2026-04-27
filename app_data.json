@@ -1,11 +1,6 @@
 {
   "passwords": [
     {
-      "pwd": "321",
-      "uses": 10,
-      "used": 1
-    },
-    {
       "pwd": "1",
       "uses": 10,
       "used": 0
