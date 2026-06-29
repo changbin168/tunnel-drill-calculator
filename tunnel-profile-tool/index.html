@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隧道轮廓绘制工具 v4 - 修正半径逻辑</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; margin-bottom: 20px; font-size: 24px; }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .canvas-container {
+            background: #0a0a0a;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            height: 700px;
+        }
+        
+        #tunnelSvg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b35;
+            margin: 20px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255,107,53,0.3);
+        }
+        .section-title:first-child { margin-top: 0; }
+        
+        .arc-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .arc-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: grid;
+            grid-template-columns: 30px 1fr 1fr 50px 24px;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .arc-item .num {
+            background: #ff6b35;
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .arc-item .arc-type {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            text-align: center;
+        }
+        .arc-item .arc-type.arc { background: #4CAF50; color: #fff; }
+        .arc-item .arc-type.line { background: #666; color: #ccc; }
+        .arc-item .btn-delete {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(244, 67, 54, 0.8);
+            border: none;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            transition: all 0.2s;
+        }
+        .arc-item .btn-delete:hover {
+            background: #f44336;
+            transform: scale(1.1);
+        }
+        
+        .arc-item input {
+            width: 100%;
+            padding: 6px 8px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #ff6b35, #f7931e);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,107,53,0.4); }
+        .btn-secondary { background: rgba(255,255,255,0.1); }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .info-display {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+        
+        .info-display .coord {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .mouse-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+        }
+        
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        label {
+            font-size: 12px;
+            color: #aaa;
+            min-width: 60px;
+        }
+        
+        input[type="color"] {
+            width: 40px;
+            height: 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .legend {
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0;
+        }
+        .legend-color {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚇 隧道轮廓绘制工具 v4 - 修正半径逻辑</h1>
+        <div id="versionTag" style="background:#ff6b35;color:#fff;padding:6px 12px;border-radius:6px;margin-bottom:12px;font-size:12px;text-align:center;">
+            📌 当前版本：v4-FINAL 修复版（无水沟） · 文件大小 37817 bytes · 锦屏应显示 <b>96.28 m²</b>
+        </div>
+
+        <div class="main-layout">
+            <div class="panel">
+                <div class="section-title">📐 快捷预设</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px;">
+                    <button class="btn" onclick="loadPreset('example')">示例轮廓</button>
+                    <button class="btn" onclick="loadPreset('jinping')">锦屏隧道</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">清空</button>
+                </div>
+                
+                <div class="section-title">📏 轮廓点定义（逆时针顺序）</div>
+                <div class="arc-list" id="arcList"></div>
+                <button class="btn btn-secondary" onclick="addArcPoint()" style="width:100%;">+ 添加轮廓点</button>
+                
+                <div class="legend">
+                    <strong>图例说明：</strong>
+                    <div class="legend-item"><div class="legend-color" style="background:#4CAF50;"></div>圆弧段（R>0）</div>
+                    <div class="legend-item"><div class="legend-color" style="background:#888;"></div>直线段（R=0）</div>
+                    <div style="margin-top:8px;color:#888;">
+                        <strong>半径归属：</strong>R值在弧线<strong>起点</strong>标注<br>
+                        表示：从该点→下一点使用此半径画弧
+                    </div>
+                </div>
+                
+                <div class="section-title">🎨 显示设置</div>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="showGrid" checked onchange="draw()"> 网格</label>
+                    <label><input type="checkbox" id="showAxis" checked onchange="draw()"> 坐标轴</label>
+                    <label><input type="checkbox" id="showPoints" checked onchange="draw()"> 控制点</label>
+                    <label><input type="checkbox" id="showCenter" onchange="draw()"> 圆心</label>
+                </div>
+                
+                <div class="input-row">
+                    <label>轮廓颜色</label>
+                    <input type="color" id="outlineColor" value="#00ff88" onchange="draw()">
+                    <label>填充</label>
+                    <input type="color" id="fillColor" value="#00ff88" onchange="draw()">
+                </div>
+                
+                <div class="section-title">📊 轮廓信息</div>
+                <div class="info-display" id="infoDisplay">
+                    <div class="coord"><span>总宽度:</span><span id="totalWidth">-</span></div>
+                    <div class="coord"><span>总高度:</span><span id="totalHeight">-</span></div>
+                    <div class="coord" style="background:rgba(255,107,53,0.15);margin-top:6px;padding:6px;border-radius:4px;"><span><b>断面面积:</b></span><span id="area"><b>-</b></span></div>
+                    <div class="coord"><span>周长:</span><span id="perimeter">-</span></div>
+                </div>
+                
+                <div class="section-title">💾 数据管理</div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                    <button class="btn" onclick="saveToLocal()">💾 保存</button>
+                    <button class="btn btn-secondary" onclick="loadFromLocal()">📂 加载</button>
+                    <button class="btn btn-secondary" onclick="exportJSON()">⬇ JSON</button>
+                    <button class="btn btn-secondary" onclick="importJSON()">⬆ JSON</button>
+                </div>
+
+                <div class="section-title">📚 轮廓库（云同步）</div>
+                <div class="input-row" style="margin-bottom:8px;">
+                    <input type="text" id="profileName" placeholder="给当前轮廓起个名字（如：锦屏三车道）" style="flex:1;padding:8px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:#fff;font-size:12px;">
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
+                    <button class="btn" onclick="saveToLibrary()">💾 保存到轮廓库</button>
+                    <button class="btn btn-secondary" onclick="refreshLibrary()">🔄 刷新</button>
+                </div>
+                <div id="libraryList" style="max-height:200px;overflow-y:auto;background:rgba(0,0,0,0.2);border-radius:6px;padding:8px;font-size:12px;">
+                    <div style="color:#888;text-align:center;padding:20px;">暂无保存的轮廓</div>
+                </div>
+                
+                <div class="section-title">💾 导出图片</div>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn" onclick="exportSVG()">导出SVG</button>
+                    <button class="btn" onclick="exportPNG()">导出PNG</button>
+                </div>
+            </div>
+            
+            <div class="canvas-container">
+                <svg id="tunnelSvg" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                            <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect id="bgGrid" width="100%" height="100%" fill="url(#grid)" style="display:none;"/>
+                    <g id="axisGroup"></g>
+                    <g id="centerGroup"></g>
+                    <path id="tunnelPath" fill="none" stroke="#00ff88" stroke-width="3"/>
+                    <g id="pointsGroup"></g>
+                    <g id="labelsGroup"></g>
+                </svg>
+                <div class="mouse-info" id="mouseInfo">移动鼠标查看坐标</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const svg = document.getElementById('tunnelSvg');
+        const tunnelPath = document.getElementById('tunnelPath');
+        const pointsGroup = document.getElementById('pointsGroup');
+        const labelsGroup = document.getElementById('labelsGroup');
+        const axisGroup = document.getElementById('axisGroup');
+        const centerGroup = document.getElementById('centerGroup');
+        
+        let scale = 30;
+        let offsetX = 400, offsetY = 350;
+        let arcPoints = [];
+        
+        function init() {
+            loadPreset('jinping');
+            setupMouseInteraction();
+        }
+        
+        function loadPreset(name) {
+            if (name === 'example') {
+                // 简单示例：底部圆弧 + 顶部直线
+                arcPoints = [
+                    {x: -2, y: -5, r: 5},    // 点1→点2：底部圆弧(向下凸)
+                    {x: 2, y: -5, r: 0},     // 点2→点3：直线
+                    {x: 2, y: 5, r: 0},      // 点3→点4：直线
+                    {x: -2, y: 5, r: 0}       // 点4→点1：直线
+                ];
+            } else if (name === 'jinping') {
+                // 锦屏隧道真实数据
+                // 关键：R值标注在弧线起点
+                // 顶部拱形：(-6.55, 1.25) → (0, 7.8) → (6.55, 1.25)，半径6.55m
+                arcPoints = [
+                    {x: -0.995, y: -0.850, r: 0},   // 点1→点2：直线
+                    {x: -6.550, y: -0.850, r: 0},   // 点2→点3：直线
+                    {x: -6.550, y: 1.250, r: 6.55}, // 点3→点4：圆弧（半径在起点）
+                    {x: 0.000, y: 7.800, r: 6.55}, // 点4→点5：圆弧（同一拱形）
+                    {x: 6.550, y: 1.250, r: 0},    // 点5→点6：直线
+                    {x: 6.550, y: -0.850, r: 0},    // 点6→点7：直线
+                    {x: 0.955, y: -0.850, r: 0},    // 点7→点8：直线
+                    {x: 0.750, y: -1.650, r: 0},    // 点8→点9：直线
+                    {x: -0.750, y: -1.650, r: 0}     // 点9→点1：直线
+                ];
+            }
+            renderArcList();
+            draw();
+        }
+        
+        function clearAll() {
+            arcPoints = [];
+            renderArcList();
+            draw();
+        }
+        
+        function renderArcList() {
+            const list = document.getElementById('arcList');
+            list.innerHTML = '';
+            arcPoints.forEach((p, i) => {
+                const nextP = arcPoints[(i + 1) % arcPoints.length];
+                const isArc = Math.abs(p.r) > 0.001;
+                
+                const div = document.createElement('div');
+                div.className = 'arc-item';
+                div.innerHTML = `
+                    <div class="num">${i+1}</div>
+                    <input type="number" placeholder="X" value="${p.x}" step="0.1" onchange="updatePoint(${i}, 'x', this.value)">
+                    <input type="number" placeholder="Y" value="${p.y}" step="0.1" onchange="updatePoint(${i}, 'y', this.value)">
+                    <input type="number" placeholder="R" value="${p.r}" step="0.1" onchange="updatePoint(${i}, 'r', this.value)">
+                    <div class="arc-type ${isArc ? 'arc' : 'line'}">${isArc ? '弧' : '直'}</div>
+                    <button class="btn-delete" onclick="deletePoint(${i})" title="删除">×</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+        
+        function deletePoint(index) {
+            if (arcPoints.length <= 2) {
+                alert('至少需要2个点');
+                return;
+            }
+            arcPoints.splice(index, 1);
+            renderArcList();
+            draw();
+        }
+        
+        function addArcPoint() {
+            arcPoints.push({x: 0, y: 0, r: 0});
+            renderArcList();
+            draw();
+        }
+        
+        function updatePoint(index, field, value) {
+            arcPoints[index][field] = parseFloat(value) || 0;
+            renderArcList();
+            draw();
+        }
+        
+        function toScreen(x, y) {
+            return { x: offsetX + x * scale, y: offsetY - y * scale };
+        }
+        
+        function toWorld(sx, sy) {
+            return { x: (sx - offsetX) / scale, y: (offsetY - sy) / scale };
+        }
+        
+        // 计算圆弧参数：圆心和sweep-flag
+        // 核心策略：枚举两个候选圆心，根据扫角绝对值选短弧对应的
+        // 但 r>0 时两候选都是 90° 平局，需要其他规则打破平局
+        // 平局打破：选圆心"在多边形内部"的那个
+        function calculateArcParams(p1, p2, r, allPoints) {
+            const dx = p2.x - p1.x;
+            const dy = p2.y - p1.y;
+            const d = Math.sqrt(dx*dx + dy*dy);
+
+            if (d === 0 || Math.abs(r) < 0.001) return null;
+            if (Math.abs(r) * 2 < d - 0.001) return null;
+
+            const mx = (p1.x + p2.x) / 2;
+            const my = (p1.y + p2.y) / 2;
+
+            // 弦的垂直方向
+            const perpX1 = -dy / d, perpY1 = dx / d;
+            const perpX2 = dy / d, perpY2 = -dx / d;
+
+            const absR = Math.abs(r);
+            const h = Math.sqrt(absR*absR - (d/2)*(d/2));
+            if (isNaN(h)) return null;
+
+            function calcDiff(cx, cy) {
+                const a1 = Math.atan2(p1.y - cy, p1.x - cx);
+                const a2 = Math.atan2(p2.y - cy, p2.x - cx);
+                let diff = a2 - a1;
+                while (diff > Math.PI) diff -= 2 * Math.PI;
+                while (diff < -Math.PI) diff += 2 * Math.PI;
+                return diff;
+            }
+
+            const cands = [
+                { x: mx + perpX1 * h, y: my + perpY1 * h, sweep: 0, diff: calcDiff(mx + perpX1*h, my + perpY1*h) },
+                { x: mx + perpX2 * h, y: my + perpY2 * h, sweep: 1, diff: calcDiff(mx + perpX2*h, my + perpY2*h) }
+            ];
+
+            // 选圆心
+            let c;
+            const d0 = Math.abs(cands[0].diff);
+            const d1 = Math.abs(cands[1].diff);
+            if (Math.abs(d0 - d1) > 0.01) {
+                // 明显不等：r>0选短弧，r<0选长弧
+                if (r > 0) c = d0 < d1 ? cands[0] : cands[1];
+                else c = d0 > d1 ? cands[0] : cands[1];
+            } else {
+                // 平局：选圆心"在多边形内部"的那个（用户用 R>0 表达"弧线向外凸"，圆心应在内部）
+                // 没有 allPoints 时默认选 sweep=0（逆时针，更符合数学约定）
+                if (allPoints && allPoints.length >= 3) {
+                    c = pickInside(cands, allPoints);
+                } else {
+                    c = cands[0];
+                }
+            }
+
+            const absDiff = Math.abs(c.diff);
+            const largeArc = absDiff > Math.PI ? 1 : 0;
+
+            return { center: c, sweep: c.sweep, largeArc: largeArc, diff: c.diff };
+        }
+
+        // 选圆心在多边形内部的那个
+        function pickInside(cands, allPoints) {
+            function pointInPoly(px, py, poly) {
+                let inside = false;
+                for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+                    const xi = poly[i].x, yi = poly[i].y;
+                    const xj = poly[j].x, yj = poly[j].y;
+                    if (((yi > py) !== (yj > py)) &&
+                        (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+                        inside = !inside;
+                    }
+                }
+                return inside;
+            }
+            const in0 = pointInPoly(cands[0].x, cands[0].y, allPoints);
+            const in1 = pointInPoly(cands[1].x, cands[1].y, allPoints);
+            // 优先选内部
+            if (in0 && !in1) return cands[0];
+            if (in1 && !in0) return cands[1];
+            return cands[0];
+        }
+        
+        function draw() {
+            // 网格
+            document.getElementById('bgGrid').style.display =
+                document.getElementById('showGrid').checked ? 'block' : 'none';
+
+            // 坐标轴
+            axisGroup.innerHTML = '';
+            centerGroup.innerHTML = '';
+            if (document.getElementById('showAxis').checked) {
+                const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                xAxis.setAttribute('x1', 0); xAxis.setAttribute('y1', offsetY);
+                xAxis.setAttribute('x2', 1000); xAxis.setAttribute('y2', offsetY);
+                xAxis.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+                xAxis.setAttribute('stroke-width', 2);
+                axisGroup.appendChild(xAxis);
+                
+                const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                yAxis.setAttribute('x1', offsetX); yAxis.setAttribute('y1', 0);
+                yAxis.setAttribute('x2', offsetX); yAxis.setAttribute('y2', 700);
+                yAxis.setAttribute('stroke', 'rgba(255,255,255,0.3)');
+                yAxis.setAttribute('stroke-width', 2);
+                axisGroup.appendChild(yAxis);
+                
+                // 原点
+                const origin = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                origin.setAttribute('cx', offsetX); origin.setAttribute('cy', offsetY);
+                origin.setAttribute('r', 4); origin.setAttribute('fill', '#ff6b35');
+                axisGroup.appendChild(origin);
+            }
+            
+            if (arcPoints.length < 2) {
+                tunnelPath.setAttribute('d', '');
+                pointsGroup.innerHTML = '';
+                labelsGroup.innerHTML = '';
+                return;
+            }
+            
+            // 构建SVG路径
+            let d = '';
+            const first = toScreen(arcPoints[0].x, arcPoints[0].y);
+            d += `M ${first.x} ${first.y}`;
+            
+            const arcCenters = []; // 存储每个圆弧的圆心
+            
+            for (let i = 0; i < arcPoints.length; i++) {
+                const p1 = arcPoints[i];
+                const p2 = arcPoints[(i + 1) % arcPoints.length];
+                const s2 = toScreen(p2.x, p2.y);
+                
+                // 半径在起点(p1)，从p1走向p2时应用
+                if (Math.abs(p1.r) < 0.001) {
+                    d += ` L ${s2.x} ${s2.y}`;
+                    arcCenters.push(null);
+                } else {
+                    const r = Math.abs(p1.r) * scale;
+                    const arcParams = calculateArcParams(p1, p2, p1.r, arcPoints);
+                    const center = arcParams ? arcParams.center : null;
+                    arcCenters.push(center);
+                    
+                    if (center) {
+                        // SVG圆弧命令: A rx ry x-axis-rotation large-arc-flag sweep-flag x y
+                        // large-arc-flag: 1=大弧(>180°), 0=小弧(<180°)
+                        // sweep-flag: 1=顺时针, 0=逆时针
+                        const sweep = arcParams.sweep;
+                        // 根据圆心角大小决定用大弧还是小弧
+                        const largeArc = arcParams.largeArc;
+                        d += ` A ${r} ${r} 0 ${largeArc} ${sweep} ${s2.x} ${s2.y}`;
+                    } else {
+                        d += ` L ${s2.x} ${s2.y}`;
+                        arcCenters[arcCenters.length - 1] = null;
+                    }
+                }
+            }
+            d += ' Z';
+            
+            tunnelPath.setAttribute('d', d);
+            tunnelPath.setAttribute('stroke', document.getElementById('outlineColor').value);
+            tunnelPath.setAttribute('fill', document.getElementById('fillColor').value + '20');
+            
+            // 绘制圆心
+            if (document.getElementById('showCenter').checked) {
+                arcCenters.forEach((center, i) => {
+                    if (center) {
+                        const sc = toScreen(center.x, center.y);
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', sc.x); circle.setAttribute('cy', sc.y);
+                        circle.setAttribute('r', 4); circle.setAttribute('fill', '#f44336');
+                        circle.setAttribute('stroke', '#fff'); circle.setAttribute('stroke-width', 1);
+                        centerGroup.appendChild(circle);
+                        
+                        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        label.setAttribute('x', sc.x + 8); label.setAttribute('y', sc.y + 4);
+                        label.setAttribute('fill', '#f44336'); label.setAttribute('font-size', '10');
+                        label.textContent = `O${i+1}`;
+                        centerGroup.appendChild(label);
+                    }
+                });
+            }
+            
+            // 控制点
+            pointsGroup.innerHTML = '';
+            labelsGroup.innerHTML = '';
+            
+            if (document.getElementById('showPoints').checked) {
+                arcPoints.forEach((p, i) => {
+                    const s = toScreen(p.x, p.y);
+                    
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', s.x); circle.setAttribute('cy', s.y);
+                    circle.setAttribute('r', 5); 
+                    circle.setAttribute('fill', p.r > 0.001 ? '#4CAF50' : '#ff6b35');
+                    pointsGroup.appendChild(circle);
+                    
+                    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    label.setAttribute('x', s.x + 8); label.setAttribute('y', s.y - 8);
+                    label.setAttribute('fill', '#fff'); label.setAttribute('font-size', '11');
+                    label.setAttribute('font-weight', 'bold');
+                    label.textContent = `${i+1}(${p.x.toFixed(2)},${p.y.toFixed(2)})`;
+                    labelsGroup.appendChild(label);
+                    
+                    // 标注半径（在该点标注，表示到下一点用此半径）
+                    if (Math.abs(p.r) > 0.001) {
+                        const rLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                        rLabel.setAttribute('x', s.x + 8); rLabel.setAttribute('y', s.y + 15);
+                        rLabel.setAttribute('fill', '#4CAF50'); rLabel.setAttribute('font-size', '11');
+                        rLabel.setAttribute('font-weight', 'bold');
+                        rLabel.textContent = `R=${p.r.toFixed(2)}`;
+                        labelsGroup.appendChild(rLabel);
+                    }
+                });
+            }
+            
+            calculateInfo();
+        }
+        
+        function calculateInfo() {
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            arcPoints.forEach(p => {
+                minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x);
+                minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y);
+            });
+
+            document.getElementById('totalWidth').textContent = (maxX - minX).toFixed(2) + ' m';
+            document.getElementById('totalHeight').textContent = (maxY - minY).toFixed(2) + ' m';
+
+            // ========== 面积计算（采样积分法，最稳健）==========
+            // 原理：把每段弧线细分为N个微元点，用Shoelace公式积分
+            // 直线段直接用两端点
+            const SAMPLE_PER_ARC = 200;
+            const samples = [];
+            for (let i = 0; i < arcPoints.length; i++) {
+                const p1 = arcPoints[i], p2 = arcPoints[(i+1) % arcPoints.length];
+                if (Math.abs(p1.r) < 0.001) {
+                    samples.push(p1);
+                } else {
+                    samples.push(p1);
+                    const ap = calculateArcParams(p1, p2, p1.r);
+                    if (ap) {
+                        const c = ap.center;
+                        let a1 = Math.atan2(p1.y - c.y, p1.x - c.x);
+                        let a2 = Math.atan2(p2.y - c.y, p2.x - c.x);
+                        // 调整扫角方向：r>0选diff<0（顺时针），r<0选diff>0（逆时针）
+                        let diff = a2 - a1;
+                        if (diff > 0 && p1.r > 0) diff -= 2 * Math.PI;
+                        if (diff < 0 && p1.r < 0) diff += 2 * Math.PI;
+                        for (let k = 1; k < SAMPLE_PER_ARC; k++) {
+                            const t = k / SAMPLE_PER_ARC;
+                            const a = a1 + diff * t;
+                            samples.push({
+                                x: c.x + Math.abs(p1.r) * Math.cos(a),
+                                y: c.y + Math.abs(p1.r) * Math.sin(a)
+                            });
+                        }
+                    }
+                }
+            }
+            // 闭合路径
+            const pts = samples.length ? [...samples, samples[0]] : [];
+            let signedArea = 0;
+            for (let i = 0; i < pts.length - 1; i++) {
+                signedArea += pts[i].x * pts[i+1].y - pts[i+1].x * pts[i].y;
+            }
+            const area = Math.abs(signedArea) / 2;
+
+            // 周长
+            let perimeter = 0;
+            for (let i = 0; i < arcPoints.length; i++) {
+                const p1 = arcPoints[i], p2 = arcPoints[(i+1) % arcPoints.length];
+                const dx = p2.x - p1.x, dy = p2.y - p1.y;
+                const chord = Math.sqrt(dx*dx + dy*dy);
+                if (Math.abs(p1.r) < 0.001) {
+                    perimeter += chord;
+                } else {
+                    const ap = calculateArcParams(p1, p2, p1.r);
+                    if (ap) {
+                        let a1 = Math.atan2(p1.y - ap.center.y, p1.x - ap.center.x);
+                        let a2 = Math.atan2(p2.y - ap.center.y, p2.x - ap.center.x);
+                        let diff = a2 - a1;
+                        if (diff > 0 && p1.r > 0) diff -= 2 * Math.PI;
+                        if (diff < 0 && p1.r < 0) diff += 2 * Math.PI;
+                        perimeter += Math.abs(p1.r) * Math.abs(diff);
+                    } else {
+                        perimeter += chord;
+                    }
+                }
+            }
+
+            document.getElementById('area').textContent = area.toFixed(2) + ' m²';
+            document.getElementById('perimeter').textContent = perimeter.toFixed(2) + ' m';
+        }
+        
+        function setupMouseInteraction() {
+            const container = document.querySelector('.canvas-container');
+            
+            container.addEventListener('mousemove', e => {
+                const rect = container.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const world = toWorld(x, y);
+                document.getElementById('mouseInfo').textContent = 
+                    `屏幕: (${Math.round(x)}, ${Math.round(y)}) | 实际: (${world.x.toFixed(2)}, ${world.y.toFixed(2)})m`;
+            });
+            
+            container.addEventListener('wheel', e => {
+                e.preventDefault();
+                scale *= e.deltaY > 0 ? 0.9 : 1.1;
+                scale = Math.max(10, Math.min(100, scale));
+                draw();
+            });
+        }
+        
+        function exportSVG() {
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgData], {type: 'image/svg+xml'});
+            const link = document.createElement('a');
+            link.download = '隧道轮廓.svg';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+        
+        function exportPNG() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800; canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            
+            const img = new Image();
+            const svgData = new XMLSerializer().serializeToString(svg);
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+            
+            img.onload = () => {
+                ctx.drawImage(img, 0, 0);
+                const link = document.createElement('a');
+                link.download = '隧道轮廓.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+        }
+        
+        // 保存到本地存储
+        function saveToLocal() {
+            const data = JSON.stringify(arcPoints);
+            localStorage.setItem('tunnel_profile_data', data);
+            alert('✓ 数据已保存到浏览器');
+        }
+        
+        // 从本地存储加载
+        function loadFromLocal() {
+            const data = localStorage.getItem('tunnel_profile_data');
+            if (data) {
+                arcPoints = JSON.parse(data);
+                renderArcList();
+                draw();
+                alert('✓ 数据已加载');
+            } else {
+                alert('没有找到保存的数据');
+            }
+        }
+        
+        // 导出JSON文件
+        function exportJSON() {
+            const data = JSON.stringify(arcPoints, null, 2);
+            const blob = new Blob([data], {type: 'application/json'});
+            const link = document.createElement('a');
+            link.download = '隧道轮廓数据.json';
+            link.href = URL.createObjectURL(blob);
+            link.click();
+        }
+        
+        // 导入JSON文件
+        function importJSON() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        try {
+                            arcPoints = JSON.parse(event.target.result);
+                            renderArcList();
+                            draw();
+                            alert('✓ JSON文件已导入');
+                        } catch (err) {
+                            alert('导入失败：' + err.message);
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+        
+        init();
+
+        // ========== 轮廓库管理（多轮廓保存+随时调出）==========
+        const LIBRARY_KEY = 'tunnel_profile_library_v1';
+
+        // 加载轮廓库
+        function loadLibrary() {
+            try {
+                return JSON.parse(localStorage.getItem(LIBRARY_KEY) || '{}');
+            } catch {
+                return {};
+            }
+        }
+
+        // 保存当前轮廓到轮廓库
+        function saveToLibrary() {
+            const nameEl = document.getElementById('profileName');
+            const name = (nameEl.value || '').trim();
+            if (!name) {
+                alert('请先给当前轮廓起个名字');
+                nameEl.focus();
+                return;
+            }
+            if (arcPoints.length < 2) {
+                alert('当前轮廓无效（至少需要2个点）');
+                return;
+            }
+
+            const lib = loadLibrary();
+            const now = new Date().toLocaleString('zh-CN');
+            lib[name] = {
+                name: name,
+                points: JSON.parse(JSON.stringify(arcPoints)),
+                createdAt: lib[name] ? lib[name].createdAt : now,
+                updatedAt: now
+            };
+            localStorage.setItem(LIBRARY_KEY, JSON.stringify(lib));
+            nameEl.value = '';
+            renderLibrary();
+            alert(`✓ 轮廓"${name}"已保存到轮廓库`);
+        }
+
+        // 从轮廓库调出
+        function loadFromLibrary(name) {
+            const lib = loadLibrary();
+            if (!lib[name]) {
+                alert('找不到该轮廓');
+                return;
+            }
+            if (arcPoints.length > 0) {
+                if (!confirm(`加载"${name}"会覆盖当前未保存的轮廓，确定吗？`)) return;
+            }
+            arcPoints = JSON.parse(JSON.stringify(lib[name].points));
+            renderArcList();
+            draw();
+        }
+
+        // 删除轮廓库中的某条
+        function deleteFromLibrary(name) {
+            if (!confirm(`确定要删除轮廓"${name}"吗？`)) return;
+            const lib = loadLibrary();
+            delete lib[name];
+            localStorage.setItem(LIBRARY_KEY, JSON.stringify(lib));
+            renderLibrary();
+        }
+
+        // 渲染轮廓库列表
+        function renderLibrary() {
+            const lib = loadLibrary();
+            const entries = Object.values(lib).sort((a, b) =>
+                (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+            const listEl = document.getElementById('libraryList');
+            if (entries.length === 0) {
+                listEl.innerHTML = '<div style="color:#888;text-align:center;padding:20px;">暂无保存的轮廓</div>';
+                return;
+            }
+            listEl.innerHTML = entries.map(e => `
+                <div style="display:flex;align-items:center;gap:8px;padding:8px;margin-bottom:6px;background:rgba(255,255,255,0.05);border-radius:4px;">
+                    <div style="flex:1;">
+                        <div style="color:#ff6b35;font-weight:600;">${e.name}</div>
+                        <div style="color:#888;font-size:10px;">${e.points.length}个点 · ${e.updatedAt}</div>
+                    </div>
+                    <button onclick="loadFromLibrary('${e.name.replace(/'/g, "\\'")}')" style="padding:4px 10px;background:#4CAF50;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;">调出</button>
+                    <button onclick="deleteFromLibrary('${e.name.replace(/'/g, "\\'")}')" style="padding:4px 10px;background:rgba(244,67,54,0.7);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;">删除</button>
+                </div>
+            `).join('');
+        }
+
+        function refreshLibrary() {
+            renderLibrary();
+        }
+
+        // 页面加载时自动渲染轮廓库
+        renderLibrary();
+    </script>
+</body>
+</html>
